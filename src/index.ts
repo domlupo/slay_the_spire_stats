@@ -2,6 +2,7 @@ import Chart from "chart.js/auto";
 import parseJson, { JSONError } from "parse-json";
 
 type StsFile = {
+  //TODO: name of file
   character: Character;
   goldPerFloor: number[];
   floorReached: number;
@@ -39,19 +40,20 @@ type StsFile = {
   floorsItemPurged: number[];
   isEndless: boolean;
   floorsPotionsSpawned: number[];
-  // TODO: killed_by
+  killedBy: KilledBy;
   ascensionLevel: number;
 };
 
 enum Character {
+  Error,
   Ironclad,
   Silent,
   Defect,
   Watcher,
-  Error,
 }
 
 enum FloorPath {
+  Error,
   Boss,
   BossReward,
   Elite,
@@ -60,6 +62,49 @@ enum FloorPath {
   RestSite,
   Shop,
   Treasure,
+}
+
+enum KilledBy {
+  None,
+  Error,
+  TwoOrbWalkers,
+  ThreeByrds,
+  ThreeCultists,
+  ThreeDarklings,
+  ThreeSentries,
+  Automaton,
+  AwakenedOne,
+  BlueSlaver,
+  BookOfStabbing,
+  CenturionAndHealer,
+  Champ,
+  Chosen,
+  ChosenAndByrds,
+  Collector,
+  Cultist,
+  CultistAndChosen,
+  DonuAndDeca,
+  ExordiumThugs,
+  ExordiumWildlife,
+  GiantHead,
+  GremlinGang,
+  GremlinLeader,
+  GremlinNob,
+  Hexaghost,
+  Lagavulin,
+  MaskedBandits,
+  Nemesis,
+  Reptomancer,
+  ShelledParasiteAndFungi,
+  ShieldAndSpear,
+  Slavers,
+  SlimeBoss,
+  SnakePlant,
+  SphereAndTwoShapes,
+  TheGuardian,
+  TheHeart,
+  TimeEater,
+  Transient,
 }
 
 const fileInput: HTMLElement = document.getElementById("data")!;
@@ -106,26 +151,26 @@ function parseFiles(files: FileList) {
       graph(filter(stsFiles));
     })
     .catch((e) => {
-      console.log("error");
+      console.log(e);
     });
 }
 
 function parseFile(file: string): StsFile {
   let json = JSON.parse(file);
 
-  let character: Character;
-  let characterChosen: string = json.character_chosen;
-  if (characterChosen === "IRONCLAD") {
+  let character: Character = Character.Error;
+  let characterString: string = json.character_chosen;
+  if (characterString === "IRONCLAD") {
     character = Character.Ironclad;
-  } else if (characterChosen === "THE_SILENT") {
+  } else if (characterString === "THE_SILENT") {
     character = Character.Silent;
-  } else if (characterChosen === "DEFECT") {
+  } else if (characterString === "DEFECT") {
     character = Character.Defect;
-  } else if (characterChosen === "WATCHER") {
+  } else if (characterString === "WATCHER") {
     character = Character.Watcher;
   } else {
     character = Character.Error;
-    console.log("unexpected character chosen: ", characterChosen);
+    console.log("unexpected character chosen: ", characterString);
   }
 
   let floorPaths: FloorPath[] = [];
@@ -153,6 +198,92 @@ function parseFile(file: string): StsFile {
     }
   }
 
+  let killedBy: KilledBy = KilledBy.Error;
+  let killedByString: string =
+    json.killed_by === undefined
+      ? undefined
+      : json.killed_by.toLowerCase().replace(/\s+/g, "");
+  if (killedByString === undefined) {
+    killedBy = KilledBy.None;
+  } else if (killedByString === "2orbwalkers") {
+    killedBy = KilledBy.TwoOrbWalkers;
+  } else if (killedByString === "3byrds") {
+    killedBy = KilledBy.ThreeByrds;
+  } else if (killedByString === "3cultists") {
+    killedBy = KilledBy.ThreeCultists;
+  } else if (killedByString === "3darklings") {
+    killedBy = KilledBy.ThreeDarklings;
+  } else if (killedByString === "3sentries") {
+    killedBy = KilledBy.ThreeSentries;
+  } else if (killedByString === "automaton") {
+    killedBy = KilledBy.Automaton;
+  } else if (killedByString === "awakenedone") {
+    killedBy = KilledBy.AwakenedOne;
+  } else if (killedByString === "blueslaver") {
+    killedBy = KilledBy.BlueSlaver;
+  } else if (killedByString === "bookofstabbing") {
+  } else if (killedByString === "centurionandhealer") {
+    killedBy = KilledBy.CenturionAndHealer;
+  } else if (killedByString === "champ") {
+    killedBy = KilledBy.Champ;
+  } else if (killedByString === "chosen") {
+    killedBy = KilledBy.Chosen;
+  } else if (killedByString === "chosenandbyrds") {
+    killedBy = KilledBy.ChosenAndByrds;
+  } else if (killedByString === "collector") {
+    killedBy = KilledBy.Collector;
+  } else if (killedByString === "cultist") {
+    killedBy = KilledBy.Cultist;
+  } else if (killedByString === "cultistandchosen") {
+    killedBy = KilledBy.CultistAndChosen;
+  } else if (killedByString === "donuanddeca") {
+    killedBy = KilledBy.DonuAndDeca;
+  } else if (killedByString === "exordiumthugs") {
+    killedBy = KilledBy.ExordiumThugs;
+  } else if (killedByString === "exordiumwildlife") {
+    killedBy = KilledBy.ExordiumWildlife;
+  } else if (killedByString === "gianthead") {
+    killedBy = KilledBy.GiantHead;
+  } else if (killedByString === "gremlingang") {
+    killedBy = KilledBy.GremlinGang;
+  } else if (killedByString === "gremlinleader") {
+    killedBy = KilledBy.GremlinLeader;
+  } else if (killedByString === "gremlinnob") {
+    killedBy = KilledBy.GremlinNob;
+  } else if (killedByString === "hexaghost") {
+    killedBy = KilledBy.Hexaghost;
+  } else if (killedByString === "lagavulin") {
+    killedBy = KilledBy.Lagavulin;
+  } else if (killedByString === "maskedbandits") {
+    killedBy = KilledBy.MaskedBandits;
+  } else if (killedByString === "nemesis") {
+    killedBy = KilledBy.Nemesis;
+  } else if (killedByString === "reptomancer") {
+    killedBy = KilledBy.Reptomancer;
+  } else if (killedByString === "shelledparasiteandfungi") {
+    killedBy = KilledBy.ShelledParasiteAndFungi;
+  } else if (killedByString === "shieldandspear") {
+    killedBy = KilledBy.ShieldAndSpear;
+  } else if (killedByString === "slavers") {
+    killedBy = KilledBy.Slavers;
+  } else if (killedByString === "slimeboss") {
+    killedBy = KilledBy.SlimeBoss;
+  } else if (killedByString === "snakeplant") {
+    killedBy = KilledBy.SnakePlant;
+  } else if (killedByString === "sphereand2shapes") {
+    killedBy = KilledBy.SphereAndTwoShapes;
+  } else if (killedByString === "theguardian") {
+    killedBy = KilledBy.TheGuardian;
+  } else if (killedByString === "theheart") {
+    killedBy = KilledBy.TheHeart;
+  } else if (killedByString === "timeeater") {
+    killedBy = KilledBy.TimeEater;
+  } else if (killedByString === "transient") {
+    killedBy = KilledBy.Transient;
+  } else {
+    console.log("unexpected killed by: ", killedByString);
+  }
+
   return {
     character,
     goldPerFloor: json.gold_per_floor,
@@ -173,6 +304,7 @@ function parseFile(file: string): StsFile {
     floorsItemPurged: json.items_purged_floors,
     isEndless: false,
     floorsPotionsSpawned: json.potions_floor_spawned,
+    killedBy,
     ascensionLevel: json.ascension_level,
   };
 }
