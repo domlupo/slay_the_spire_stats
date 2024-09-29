@@ -10,7 +10,7 @@ type StsFile = {
   playtimeSeconds: number;
   isAscensionMode: boolean;
   // TODO: campfire_choices
-  // TODO: neow_cost
+  neowCost: NeowCost;
   // TODO: master_deck
   relics: Relic[];
   floorsPotionsUsed: number[];
@@ -50,6 +50,16 @@ enum Character {
   Silent,
   Defect,
   Watcher,
+}
+
+enum NeowCost {
+  Error,
+  NoPick, // TODO: verify '' -> no pick
+  Curse,
+  None,
+  NoGold,
+  PercentDamage,
+  TenPercentHpLoss,
 }
 
 enum Relic {
@@ -340,11 +350,28 @@ function parseFile(file: string): StsFile {
   } else if (characterString === "WATCHER") {
     character = Character.Watcher;
   } else {
-    character = Character.Error;
     console.log("unexpected character chosen: ", characterString);
   }
 
-  // TODO: determine what is relic start is it [] or undefined
+  let neowCost: NeowCost = NeowCost.Error;
+  let neowCostString: string = json.neow_cost;
+  if (neowCostString === "") {
+    neowCost = NeowCost.NoPick;
+  } else if (neowCostString === "CURSE") {
+    neowCost = NeowCost.Curse;
+  } else if (neowCostString === "NONE") {
+    neowCost = NeowCost.None;
+  } else if (neowCostString === "NO_GOLD") {
+    neowCost = NeowCost.NoGold;
+  } else if (neowCostString === "PERCENT_DAMAGE") {
+    neowCost = NeowCost.PercentDamage;
+  } else if (neowCostString === "TEN_PERCENT_HP_LOSS") {
+    neowCost = NeowCost.TenPercentHpLoss;
+  } else {
+    console.log("unexpected neow cost", neowCost);
+  }
+
+  // TODO: verify what is relic start is it [] or undefined
   let relics: Relic[] = [];
   let relicStrings: string[] = json.relics;
   for (let i = 0; i < relicStrings.length; i++) {
@@ -808,6 +835,7 @@ function parseFile(file: string): StsFile {
     floorReached: json.floor_reached,
     playtimeSeconds: json.playtime,
     isAscensionMode: json.is_ascension_mode,
+    neowCost: json.neow_cost,
     relics,
     floorsPotionsUsed: json.potions_floor_usage,
     floorPaths,
