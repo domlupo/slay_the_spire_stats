@@ -22,7 +22,7 @@ type StsFile = {
   floorsItemsPurchased: number[];
   floorsHp: number[];
   // TODO: gold is this start or end gold?
-  // TODO: neow_bonus
+  neowBonus: NeowBonus;
   isDaily: boolean;
   isSeeded: boolean;
   campfireUpgrades: number;
@@ -36,7 +36,7 @@ type StsFile = {
   // TODO: card_choices
   // TODO: relics_obtained
   // TODO: event_choices
-  // TODO: boss_relics
+  bossRelicChoices: BossRelicChoice[];
   floorsItemPurged: number[];
   isEndless: boolean;
   floorsPotionsSpawned: number[];
@@ -243,6 +243,70 @@ enum FloorPath {
   RestSite,
   Shop,
   Treasure,
+}
+
+enum NeowBonus {
+  None,
+  Error,
+  BossRelic,
+  OneHundredGold,
+  OneRandomRareCard,
+  OneRareRelic,
+  RandomColorless,
+  RandomColorlessTwo,
+  RandomCommonRelic,
+  RemoveOneCard,
+  RemoveTwoCard,
+  TenPercentHpBonus,
+  ThreeCards,
+  ThreeEnemyKill,
+  ThreeRareCards,
+  ThreeSmallPotions,
+  TransformCard,
+  TransformTwoCards,
+  TwentyPercentHpBonus,
+  TwoHundredFiftyGold,
+  UpgradeCard,
+}
+
+type BossRelicChoice = {
+  picked: BossRelic;
+  notPicked: BossRelic[];
+};
+
+enum BossRelic {
+  Error,
+  None,
+  Astrolabe,
+  BlackBlood,
+  BlackStar,
+  BustedCrown,
+  CallingBell,
+  CoffeeDripper,
+  CursedKey,
+  Ectoplasm,
+  EmptyCage,
+  FrozenCore,
+  FusionHammer,
+  HolyWater,
+  HoveringKite,
+  Inserter,
+  MarkOfPain,
+  NuclearBattery,
+  PandorasBox,
+  PhilosophersStone,
+  RingOfTheSerpent,
+  RunicCube,
+  RunicDome,
+  RunicPyramid,
+  SacredBark,
+  SlaversCollar,
+  SneckoEye,
+  Sozu,
+  TinyHouse,
+  VelvetChoker,
+  VioletLotus,
+  WristBlade,
 }
 
 enum KilledBy {
@@ -742,6 +806,66 @@ function parseFile(file: string): StsFile {
     }
   }
 
+  let neowBonus: NeowBonus = NeowBonus.Error;
+  let neowBonusString: string = json.neow_bonus;
+  if (neowBonusString === "") {
+    neowBonus = NeowBonus.None;
+  } else if (neowBonusString === "BOSS_RELIC") {
+    neowBonus = NeowBonus.BossRelic;
+  } else if (neowBonusString === "HUNDRED_GOLD") {
+    neowBonus = NeowBonus.OneHundredGold;
+  } else if (neowBonusString === "ONE_RANDOM_RARE_CARD") {
+    neowBonus = NeowBonus.OneRandomRareCard;
+  } else if (neowBonusString === "ONE_RARE_RELIC") {
+    neowBonus = NeowBonus.OneRareRelic;
+  } else if (neowBonusString === "RANDOM_COLORLESS") {
+    neowBonus = NeowBonus.RandomColorless;
+  } else if (neowBonusString === "RANDOM_COLORLESS_2") {
+    neowBonus = NeowBonus.RandomColorlessTwo;
+  } else if (neowBonusString === "RANDOM_COMMON_RELIC") {
+    neowBonus = NeowBonus.RandomCommonRelic;
+  } else if (neowBonusString === "REMOVE_CARD") {
+    neowBonus = NeowBonus.RemoveOneCard;
+  } else if (neowBonusString === "REMOVE_TWO") {
+    neowBonus = NeowBonus.RemoveTwoCard;
+  } else if (neowBonusString === "TEN_PERCENT_HP_BONUS") {
+    neowBonus = NeowBonus.TenPercentHpBonus;
+  } else if (neowBonusString === "THREE_CARDS") {
+    neowBonus = NeowBonus.ThreeCards;
+  } else if (neowBonusString === "THREE_ENEMY_KILL") {
+    neowBonus = NeowBonus.ThreeEnemyKill;
+  } else if (neowBonusString === "THREE_RARE_CARDS") {
+    neowBonus = NeowBonus.ThreeRareCards;
+  } else if (neowBonusString === "THREE_SMALL_POTIONS") {
+    neowBonus = NeowBonus.ThreeSmallPotions;
+  } else if (neowBonusString === "TRANSFORM_CARD") {
+    neowBonus = NeowBonus.TransformCard;
+  } else if (neowBonusString === "TRANSFORM_TWO_CARDS") {
+    neowBonus = NeowBonus.TransformTwoCards;
+  } else if (neowBonusString === "TWENTY_PERCENT_HP_BONUS") {
+    neowBonus = NeowBonus.TwentyPercentHpBonus;
+  } else if (neowBonusString === "TWO_FIFTY_GOLD") {
+    neowBonus = NeowBonus.TwoHundredFiftyGold;
+  } else if (neowBonusString === "UPGRADE_CARD") {
+    neowBonus = NeowBonus.UpgradeCard;
+  } else {
+    console.log("unexpected neow bonus: ", neowBonus);
+  }
+
+  let bossRelicChoices: BossRelicChoice[] = [];
+  for (let i = 0; i < json.boss_relics.length; i++) {
+    let notPicked: BossRelic[] = [];
+    let notPickedStrings: string[] = json.boss_relics[i].not_picked;
+    for (let j = 0; j < notPicked.length; j++) {
+      notPicked.push(parseBossRelic(notPickedStrings[j]));
+    }
+    let bossRelicChoice: BossRelicChoice = {
+      picked: parseBossRelic(json.boss_relics[i].picked),
+      notPicked,
+    };
+    bossRelicChoices.push(bossRelicChoice);
+  }
+
   let killedBy: KilledBy = KilledBy.Error;
   let killedByString: string =
     json.killed_by === undefined
@@ -842,18 +966,90 @@ function parseFile(file: string): StsFile {
     campfireRests: json.campfire_rested,
     floorsItemsPurchased: json.item_purchase_floors,
     floorsHp: json.current_hp_per_floor,
+    neowBonus,
     isDaily: json.is_daily,
     isSeeded: json.chose_seed,
     campfireUpgrades: json.campfire_upgraded,
     purgesPurchased: json.purchased_purges,
     won: json.victory,
     floorsMaxHp: json.max_hp_per_floor,
+    bossRelicChoices,
     floorsItemPurged: json.items_purged_floors,
     isEndless: false,
     floorsPotionsSpawned: json.potions_floor_spawned,
     killedBy,
     ascensionLevel: json.ascension_level,
   };
+}
+
+function parseBossRelic(bossRelicString: string): BossRelic {
+  let bossRelic: BossRelic = BossRelic.Error;
+  if (bossRelicString === undefined) {
+    bossRelic = BossRelic.None;
+  } else if (bossRelicString === "Astrolabe") {
+    bossRelic = BossRelic.Astrolabe;
+  } else if (bossRelicString === "Black Blood") {
+    bossRelic = BossRelic.BlackBlood;
+  } else if (bossRelicString === "Black Star") {
+    bossRelic = BossRelic.BlackStar;
+  } else if (bossRelicString === "Busted Crown") {
+    bossRelic = BossRelic.BustedCrown;
+  } else if (bossRelicString === "Calling Bell") {
+    bossRelic = BossRelic.CallingBell;
+  } else if (bossRelicString === "Coffee Dripper") {
+    bossRelic = BossRelic.CoffeeDripper;
+  } else if (bossRelicString === "Cursed Key") {
+    bossRelic = BossRelic.CursedKey;
+  } else if (bossRelicString === "Ectoplasm") {
+    bossRelic = BossRelic.Ectoplasm;
+  } else if (bossRelicString === "Empty Cage") {
+    bossRelic = BossRelic.EmptyCage;
+  } else if (bossRelicString === "FrozenCore") {
+    bossRelic = BossRelic.FrozenCore;
+  } else if (bossRelicString === "Fusion Hammer") {
+    bossRelic = BossRelic.FusionHammer;
+  } else if (bossRelicString === "HolyWater") {
+    bossRelic = BossRelic.HolyWater;
+  } else if (bossRelicString === "HoveringKite") {
+    bossRelic = BossRelic.HoveringKite;
+  } else if (bossRelicString === "Inserter") {
+    bossRelic = BossRelic.Inserter;
+  } else if (bossRelicString === "Mark of Pain") {
+    bossRelic = BossRelic.MarkOfPain;
+  } else if (bossRelicString === "Nuclear Battery") {
+    bossRelic = BossRelic.NuclearBattery;
+  } else if (bossRelicString === "Pandora's Box") {
+    bossRelic = BossRelic.PandorasBox;
+  } else if (bossRelicString === "Philosopher's Stone") {
+    bossRelic = BossRelic.PhilosophersStone;
+  } else if (bossRelicString === "Ring of the Serpent") {
+    bossRelic = BossRelic.RingOfTheSerpent;
+  } else if (bossRelicString === "Runic Cube") {
+    bossRelic = BossRelic.RunicCube;
+  } else if (bossRelicString === "Runic Dome") {
+    bossRelic = BossRelic.RunicDome;
+  } else if (bossRelicString === "Runic Pyramid") {
+    bossRelic = BossRelic.RunicPyramid;
+  } else if (bossRelicString === "SacredBark") {
+    bossRelic = BossRelic.SacredBark;
+  } else if (bossRelicString === "SlaversCollar") {
+    bossRelic = BossRelic.SlaversCollar;
+  } else if (bossRelicString === "Snecko Eye") {
+    bossRelic = BossRelic.SneckoEye;
+  } else if (bossRelicString === "Sozu") {
+    bossRelic = BossRelic.Sozu;
+  } else if (bossRelicString === "Tiny House") {
+    bossRelic = BossRelic.TinyHouse;
+  } else if (bossRelicString === "Velvet Choker") {
+    bossRelic = BossRelic.VelvetChoker;
+  } else if (bossRelicString === "VioletLotus") {
+    bossRelic = BossRelic.VioletLotus;
+  } else if (bossRelicString === "WristBlade") {
+    bossRelic = BossRelic.WristBlade;
+  } else {
+    console.log("unexpected boss relic: ", bossRelicString);
+  }
+  return bossRelic;
 }
 
 function filter(files: StsFile[]): StsFile[] {
