@@ -12,7 +12,7 @@ type StsFile = {
   // TODO: campfire_choices
   neowCost: NeowCost;
   // TODO: master_deck
-  relics: Relic[];
+  relics: Relic[]; // TODO: verify what is relic start is it [] or undefined
   floorsPotionsUsed: number[];
   // TODO: damage_taken
   potionsObtained: PotionObtained[];
@@ -34,7 +34,7 @@ type StsFile = {
   won: boolean;
   floorsMaxHp: number[];
   // TODO: card_choices
-  // TODO: relics_obtained
+  relicsObtained: RelicObtained[];
   // TODO: event_choices
   bossRelicChoices: BossRelicChoice[];
   floorsItemPurged: number[];
@@ -320,6 +320,11 @@ enum NeowBonus {
   UpgradeCard,
 }
 
+type RelicObtained = {
+  relic: Relic;
+  floor: number;
+};
+
 type BossRelicChoice = {
   picked: BossRelic;
   notPicked: BossRelic[];
@@ -486,350 +491,10 @@ function parseFile(file: string): StsFile {
     console.log("unexpected neow cost", neowCost);
   }
 
-  // TODO: verify what is relic start is it [] or undefined
   let relics: Relic[] = [];
   let relicStrings: string[] = json.relics;
   for (let i = 0; i < relicStrings.length; i++) {
-    let relic = Relic.Error;
-    let relicString = relicStrings[i].toLocaleLowerCase().replace(/\s+/g, "");
-    if (relicString === "akabeko") {
-      relic = Relic.Akabeko;
-    } else if (relicString === "anchor") {
-      relic = Relic.Anchor;
-    } else if (relicString === "ancientteaset") {
-      relic = Relic.AncientTeaSet;
-    } else if (relicString === "artofwar") {
-      relic = Relic.ArtOfWar;
-    } else if (relicString === "astrolabe") {
-      relic = Relic.Astrolabe;
-    } else if (relicString === "bagofmarbles") {
-      relic = Relic.BagOfMarbles;
-    } else if (relicString === "bagofpreparation") {
-      relic = Relic.BagOfPreparation;
-    } else if (relicString === "birdfacedurn") {
-      relic = Relic.BirdFacedUrn;
-    } else if (relicString === "blackblood") {
-      relic = Relic.BlackBlood;
-    } else if (relicString === "blackstar") {
-      relic = Relic.BlackStar;
-    } else if (relicString === "bloodvial") {
-      relic = Relic.BloodVial;
-    } else if (relicString === "bluecandle") {
-      relic = Relic.BlueCandle;
-    } else if (relicString === "boot") {
-      relic = Relic.Boot;
-    } else if (relicString === "bottledflame") {
-      relic = Relic.BottledFlame;
-    } else if (relicString === "bottledlightning") {
-      relic = Relic.BottledLightning;
-    } else if (relicString === "bottledtornado") {
-      relic = Relic.BottledTornado;
-    } else if (relicString === "brimstone") {
-      relic = Relic.Brimstone;
-    } else if (relicString === "bronzescales") {
-      relic = Relic.BronzeScales;
-    } else if (relicString === "burningblood") {
-      relic = Relic.BurningBlood;
-    } else if (relicString === "bustedcrown") {
-      relic = Relic.BustedCrown;
-    } else if (relicString === "cables") {
-      relic = Relic.Cables;
-    } else if (relicString === "calipers") {
-      relic = Relic.Calipers;
-    } else if (relicString === "callingbell") {
-      relic = Relic.CallingBell;
-    } else if (relicString === "captainswheel") {
-      relic = Relic.CaptainsWheel;
-    } else if (relicString === "cauldron") {
-      relic = Relic.Cauldron;
-    } else if (relicString === "centennialpuzzle") {
-      relic = Relic.CentennialPuzzle;
-    } else if (relicString === "ceramicfish") {
-      relic = Relic.CeramicFish;
-    } else if (relicString === "championbelt") {
-      relic = Relic.ChampionBelt;
-    } else if (relicString === "charon'sashes") {
-      relic = Relic.CharonsAshes;
-    } else if (relicString === "chemicalx") {
-      relic = Relic.ChemicalX;
-    } else if (relicString === "cloakclasp") {
-      relic = Relic.CloakClasp;
-    } else if (relicString === "clockworksouvenir") {
-      relic = Relic.ClockworkSouvenir;
-    } else if (relicString === "coffeedripper") {
-      relic = Relic.CoffeeDripper;
-    } else if (relicString === "crackedcore") {
-      relic = Relic.CrackedCore;
-    } else if (relicString === "cultistmask") {
-      relic = Relic.CultistMask;
-    } else if (relicString === "cursedkey") {
-      relic = Relic.CursedKey;
-    } else if (relicString === "damaru") {
-      relic = Relic.Damaru;
-    } else if (relicString === "darkstoneperiapt") {
-      relic = Relic.DarkstonePeriapt;
-    } else if (relicString === "datadisk") {
-      relic = Relic.DataDisk;
-    } else if (relicString === "deadbranch") {
-      relic = Relic.DeadBranch;
-    } else if (relicString === "dollysmirror") {
-      relic = Relic.DollysMirror;
-    } else if (relicString === "dreamcatcher") {
-      relic = Relic.DreamCatcher;
-    } else if (relicString === "du-vudoll") {
-      relic = Relic.DuVuDoll;
-    } else if (relicString === "ectoplasm") {
-      relic = Relic.Ectoplasm;
-    } else if (relicString === "emotionchip") {
-      relic = Relic.EmotionChip;
-    } else if (relicString === "emptycage") {
-      relic = Relic.EmptyCage;
-    } else if (relicString === "enchiridion") {
-      relic = Relic.Enchiridion;
-    } else if (relicString === "eternalfeather") {
-      relic = Relic.EternalFeather;
-    } else if (relicString === "fossilizedhelix") {
-      relic = Relic.FossilizedHelix;
-    } else if (relicString === "frozenegg2") {
-      relic = Relic.FrozenEggTwo;
-    } else if (relicString === "frozeneye") {
-      relic = Relic.FrozenEye;
-    } else if (relicString === "frozencore") {
-      relic = Relic.FrozenCore;
-    } else if (relicString === "fusionhammer") {
-      relic = Relic.FusionHammer;
-    } else if (relicString === "gamblingchip") {
-      relic = Relic.GamblingChip;
-    } else if (relicString === "ginger") {
-      relic = Relic.Ginger;
-    } else if (relicString === "girya") {
-      relic = Relic.Girya;
-    } else if (relicString === "goldenidol") {
-      relic = Relic.GoldenIdol;
-    } else if (relicString === "goldeneye") {
-      relic = Relic.GoldenEye;
-    } else if (relicString === "gremlinhorn") {
-      relic = Relic.GremlinHorn;
-    } else if (relicString === "handdrill") {
-      relic = Relic.HandDrill;
-    } else if (relicString === "happyflower") {
-      relic = Relic.HappyFlower;
-    } else if (relicString === "holywater") {
-      relic = Relic.HolyWater;
-    } else if (relicString === "horncleat") {
-      relic = Relic.HornCleat;
-    } else if (relicString === "hoveringkite") {
-      relic = Relic.HoveringKite;
-    } else if (relicString === "icecream") {
-      relic = Relic.IceCream;
-    } else if (relicString === "incenseburner") {
-      relic = Relic.IncenseBurner;
-    } else if (relicString === "inkbottle") {
-      relic = Relic.InkBottle;
-    } else if (relicString === "inserter") {
-      relic = Relic.Inserter;
-    } else if (relicString === "juzubracelet") {
-      relic = Relic.JuzuBracelet;
-    } else if (relicString === "kunai") {
-      relic = Relic.Kunai;
-    } else if (relicString === "lantern") {
-      relic = Relic.Lantern;
-    } else if (relicString === "lee'swaffle") {
-      relic = Relic.LeesWaffle;
-    } else if (relicString === "letteropener") {
-      relic = Relic.LetterOpener;
-    } else if (relicString === "lizardtail") {
-      relic = Relic.LizardTail;
-    } else if (relicString === "magicflower") {
-      relic = Relic.MagicFlower;
-    } else if (relicString === "mango") {
-      relic = Relic.Mango;
-    } else if (relicString === "markofpain") {
-      relic = Relic.MarkOfPain;
-    } else if (relicString === "markofthebloom") {
-      relic = Relic.MarkOfTheBloom;
-    } else if (relicString === "matryoshka") {
-      relic = Relic.Matryoshka;
-    } else if (relicString === "mawbank") {
-      relic = Relic.MawBank;
-    } else if (relicString === "mealticket") {
-      relic = Relic.MealTicket;
-    } else if (relicString === "meatonthebone") {
-      relic = Relic.MeatOnTheBone;
-    } else if (relicString === "medicalkit") {
-      relic = Relic.MedicalKit;
-    } else if (relicString === "membershipcard") {
-      relic = Relic.MembershipCard;
-    } else if (relicString === "mercuryhourglass") {
-      relic = Relic.MercuryHourglass;
-    } else if (relicString === "moltenegg2") {
-      relic = Relic.MoltenEggTwo;
-    } else if (relicString === "mummifiedhand") {
-      relic = Relic.MummifiedHand;
-    } else if (relicString === "mutagenicstrength") {
-      relic = Relic.MutagenicStrength;
-    } else if (relicString === "necronomicon") {
-      relic = Relic.Necronomicon;
-    } else if (relicString === "neowsblessing") {
-      relic = Relic.NeowsBlessing;
-    } else if (relicString === "nilry'scodex") {
-      relic = Relic.NilrysCodex;
-    } else if (relicString === "ninjascroll") {
-      relic = Relic.NinjaScroll;
-    } else if (relicString === "nloth'sgift") {
-      relic = Relic.NlothsGift;
-    } else if (relicString === "nuclearbattery") {
-      relic = Relic.NuclearBattery;
-    } else if (relicString === "nunchaku") {
-      relic = Relic.Nunchaku;
-    } else if (relicString === "oddmushroom") {
-      relic = Relic.OddMushroom;
-    } else if (relicString === "oddlysmoothstone") {
-      relic = Relic.OddlySmoothStone;
-    } else if (relicString === "oldcoin") {
-      relic = Relic.OldCoin;
-    } else if (relicString === "omamori") {
-      relic = Relic.Omamori;
-    } else if (relicString === "orangepellets") {
-      relic = Relic.OrangePellets;
-    } else if (relicString === "orichalcum") {
-      relic = Relic.Orichalcum;
-    } else if (relicString === "ornamentalfan") {
-      relic = Relic.OrnamentalFan;
-    } else if (relicString === "orrery") {
-      relic = Relic.Orrery;
-    } else if (relicString === "pandora'sbox") {
-      relic = Relic.PandorasBox;
-    } else if (relicString === "pantograph") {
-      relic = Relic.Pantograph;
-    } else if (relicString === "papercrane") {
-      relic = Relic.PaperCrane;
-    } else if (relicString === "paperfrog") {
-      relic = Relic.PaperFrog;
-    } else if (relicString === "peacepipe") {
-      relic = Relic.PeacePipe;
-    } else if (relicString === "pear") {
-      relic = Relic.Pear;
-    } else if (relicString === "pennib") {
-      relic = Relic.PenNib;
-    } else if (relicString === "philosopher'sstone") {
-      relic = Relic.PhilosophersStone;
-    } else if (relicString === "pocketwatch") {
-      relic = Relic.Pocketwatch;
-    } else if (relicString === "potionbelt") {
-      relic = Relic.PotionBelt;
-    } else if (relicString === "prayerwheel") {
-      relic = Relic.PrayerWheel;
-    } else if (relicString === "preservedinsect") {
-      relic = Relic.PreservedInsect;
-    } else if (relicString === "purewater") {
-      relic = Relic.PureWater;
-    } else if (relicString === "questioncard") {
-      relic = Relic.QuestionCard;
-    } else if (relicString === "redmask") {
-      relic = Relic.RedMask;
-    } else if (relicString === "redskull") {
-      relic = Relic.RedSkull;
-    } else if (relicString === "regalpillow") {
-      relic = Relic.RegalPillow;
-    } else if (relicString === "ringoftheserpent") {
-      relic = Relic.RingOfTheSerpent;
-    } else if (relicString === "ringofthesnake") {
-      relic = Relic.RingofTheSnake;
-    } else if (relicString === "runiccapacitor") {
-      relic = Relic.RunicCapacitor;
-    } else if (relicString === "runiccube") {
-      relic = Relic.RunicCube;
-    } else if (relicString === "runicdome") {
-      relic = Relic.RunicDome;
-    } else if (relicString === "runicpyramid") {
-      relic = Relic.RunicPyramid;
-    } else if (relicString === "sacredbark") {
-      relic = Relic.SacredBark;
-    } else if (relicString === "selfformingclay") {
-      relic = Relic.SelfFormingClay;
-    } else if (relicString === "shovel") {
-      relic = Relic.Shovel;
-    } else if (relicString === "shuriken") {
-      relic = Relic.Shuriken;
-    } else if (relicString === "singingbowl") {
-      relic = Relic.SingingBowl;
-    } else if (relicString === "slaverscollar") {
-      relic = Relic.SlaversCollar;
-    } else if (relicString === "sling") {
-      relic = Relic.Sling;
-    } else if (relicString === "smilingmask") {
-      relic = Relic.SmilingMask;
-    } else if (relicString === "snakeskull") {
-      relic = Relic.SnakeSkull;
-    } else if (relicString === "sneckoeye") {
-      relic = Relic.SneckoEye;
-    } else if (relicString === "sozu") {
-      relic = Relic.Sozu;
-    } else if (relicString === "stonecalendar") {
-      relic = Relic.StoneCalendar;
-    } else if (relicString === "strangespoon") {
-      relic = Relic.StrangeSpoon;
-    } else if (relicString === "strawberry") {
-      relic = Relic.Strawberry;
-    } else if (relicString === "strikedummy") {
-      relic = Relic.StrikeDummy;
-    } else if (relicString === "sundial") {
-      relic = Relic.Sundial;
-    } else if (relicString === "symbioticvirus") {
-      relic = Relic.SymbioticVirus;
-    } else if (relicString === "teardroplocket") {
-      relic = Relic.TeardropLocket;
-    } else if (relicString === "thecourier") {
-      relic = Relic.TheCourier;
-    } else if (relicString === "thespecimen") {
-      relic = Relic.TheSpecimen;
-    } else if (relicString === "theabacus") {
-      relic = Relic.TheAbacus;
-    } else if (relicString === "threadandneedle") {
-      relic = Relic.ThreadAndNeedle;
-    } else if (relicString === "tingsha") {
-      relic = Relic.Tingsha;
-    } else if (relicString === "tinychest") {
-      relic = Relic.TinyChest;
-    } else if (relicString === "torii") {
-      relic = Relic.Torii;
-    } else if (relicString === "toughbandages") {
-      relic = Relic.ToughBandages;
-    } else if (relicString === "toxicegg2") {
-      relic = Relic.ToxicEggTwo;
-    } else if (relicString === "toyornithopter") {
-      relic = Relic.ToyOrnithopter;
-    } else if (relicString === "tungstenrod") {
-      relic = Relic.TungstenRod;
-    } else if (relicString === "turnip") {
-      relic = Relic.Turnip;
-    } else if (relicString === "twistedfunnel") {
-      relic = Relic.TwistedFunnel;
-    } else if (relicString === "unceasingtop") {
-      relic = Relic.UnceasingTop;
-    } else if (relicString === "vajra") {
-      relic = Relic.Vajra;
-    } else if (relicString === "velvetchoker") {
-      relic = Relic.VelvetChoker;
-    } else if (relicString === "violetlotus") {
-      relic = Relic.VioletLotus;
-    } else if (relicString === "warpaint") {
-      relic = Relic.WarPaint;
-    } else if (relicString === "warpedtongs") {
-      relic = Relic.WarpedTongs;
-    } else if (relicString === "whetstone") {
-      relic = Relic.Whetstone;
-    } else if (relicString === "whitebeaststatue") {
-      relic = Relic.WhiteBeastStatue;
-    } else if (relicString === "wingedgreaves") {
-      relic = Relic.WingedGreaves;
-    } else if (relicString === "wristblade") {
-      relic = Relic.WristBlade;
-    } else {
-      console.log("unexpected relic: ", relicString);
-    }
-    relics.push(relic);
+    relics.push(parseRelic(relicStrings[i]));
   }
 
   let floorPaths: FloorPath[] = [];
@@ -1000,6 +665,14 @@ function parseFile(file: string): StsFile {
     console.log("unexpected neow bonus: ", neowBonus);
   }
 
+  let relicsObtained: RelicObtained[] = [];
+  for (let i = 0; i < json.relics_obtained.length; i++) {
+    relicsObtained.push({
+      relic: parseRelic(json.relics_obtained[i].key),
+      floor: json.relics_obtained[i].floor,
+    });
+  }
+
   let bossRelicChoices: BossRelicChoice[] = [];
   for (let i = 0; i < json.boss_relics.length; i++) {
     let notPicked: BossRelic[] = [];
@@ -1122,13 +795,357 @@ function parseFile(file: string): StsFile {
     purgesPurchased: json.purchased_purges,
     won: json.victory,
     floorsMaxHp: json.max_hp_per_floor,
+    relicsObtained,
     bossRelicChoices,
     floorsItemPurged: json.items_purged_floors,
-    isEndless: false,
+    isEndless: json.is_endless,
     floorsPotionsSpawned: json.potions_floor_spawned,
     killedBy,
     ascensionLevel: json.ascension_level,
   };
+}
+
+function parseRelic(relicString: string): Relic {
+  let relic = Relic.Error;
+  relicString = relicString.toLocaleLowerCase().replace(/\s+/g, "");
+  if (relicString === "akabeko") {
+    relic = Relic.Akabeko;
+  } else if (relicString === "anchor") {
+    relic = Relic.Anchor;
+  } else if (relicString === "ancientteaset") {
+    relic = Relic.AncientTeaSet;
+  } else if (relicString === "artofwar") {
+    relic = Relic.ArtOfWar;
+  } else if (relicString === "astrolabe") {
+    relic = Relic.Astrolabe;
+  } else if (relicString === "bagofmarbles") {
+    relic = Relic.BagOfMarbles;
+  } else if (relicString === "bagofpreparation") {
+    relic = Relic.BagOfPreparation;
+  } else if (relicString === "birdfacedurn") {
+    relic = Relic.BirdFacedUrn;
+  } else if (relicString === "blackblood") {
+    relic = Relic.BlackBlood;
+  } else if (relicString === "blackstar") {
+    relic = Relic.BlackStar;
+  } else if (relicString === "bloodvial") {
+    relic = Relic.BloodVial;
+  } else if (relicString === "bluecandle") {
+    relic = Relic.BlueCandle;
+  } else if (relicString === "boot") {
+    relic = Relic.Boot;
+  } else if (relicString === "bottledflame") {
+    relic = Relic.BottledFlame;
+  } else if (relicString === "bottledlightning") {
+    relic = Relic.BottledLightning;
+  } else if (relicString === "bottledtornado") {
+    relic = Relic.BottledTornado;
+  } else if (relicString === "brimstone") {
+    relic = Relic.Brimstone;
+  } else if (relicString === "bronzescales") {
+    relic = Relic.BronzeScales;
+  } else if (relicString === "burningblood") {
+    relic = Relic.BurningBlood;
+  } else if (relicString === "bustedcrown") {
+    relic = Relic.BustedCrown;
+  } else if (relicString === "cables") {
+    relic = Relic.Cables;
+  } else if (relicString === "calipers") {
+    relic = Relic.Calipers;
+  } else if (relicString === "callingbell") {
+    relic = Relic.CallingBell;
+  } else if (relicString === "captainswheel") {
+    relic = Relic.CaptainsWheel;
+  } else if (relicString === "cauldron") {
+    relic = Relic.Cauldron;
+  } else if (relicString === "centennialpuzzle") {
+    relic = Relic.CentennialPuzzle;
+  } else if (relicString === "ceramicfish") {
+    relic = Relic.CeramicFish;
+  } else if (relicString === "championbelt") {
+    relic = Relic.ChampionBelt;
+  } else if (relicString === "charon'sashes") {
+    relic = Relic.CharonsAshes;
+  } else if (relicString === "chemicalx") {
+    relic = Relic.ChemicalX;
+  } else if (relicString === "cloakclasp") {
+    relic = Relic.CloakClasp;
+  } else if (relicString === "clockworksouvenir") {
+    relic = Relic.ClockworkSouvenir;
+  } else if (relicString === "coffeedripper") {
+    relic = Relic.CoffeeDripper;
+  } else if (relicString === "crackedcore") {
+    relic = Relic.CrackedCore;
+  } else if (relicString === "cultistmask") {
+    relic = Relic.CultistMask;
+  } else if (relicString === "cursedkey") {
+    relic = Relic.CursedKey;
+  } else if (relicString === "damaru") {
+    relic = Relic.Damaru;
+  } else if (relicString === "darkstoneperiapt") {
+    relic = Relic.DarkstonePeriapt;
+  } else if (relicString === "datadisk") {
+    relic = Relic.DataDisk;
+  } else if (relicString === "deadbranch") {
+    relic = Relic.DeadBranch;
+  } else if (relicString === "dollysmirror") {
+    relic = Relic.DollysMirror;
+  } else if (relicString === "dreamcatcher") {
+    relic = Relic.DreamCatcher;
+  } else if (relicString === "du-vudoll") {
+    relic = Relic.DuVuDoll;
+  } else if (relicString === "ectoplasm") {
+    relic = Relic.Ectoplasm;
+  } else if (relicString === "emotionchip") {
+    relic = Relic.EmotionChip;
+  } else if (relicString === "emptycage") {
+    relic = Relic.EmptyCage;
+  } else if (relicString === "enchiridion") {
+    relic = Relic.Enchiridion;
+  } else if (relicString === "eternalfeather") {
+    relic = Relic.EternalFeather;
+  } else if (relicString === "fossilizedhelix") {
+    relic = Relic.FossilizedHelix;
+  } else if (relicString === "frozenegg2") {
+    relic = Relic.FrozenEggTwo;
+  } else if (relicString === "frozeneye") {
+    relic = Relic.FrozenEye;
+  } else if (relicString === "frozencore") {
+    relic = Relic.FrozenCore;
+  } else if (relicString === "fusionhammer") {
+    relic = Relic.FusionHammer;
+  } else if (relicString === "gamblingchip") {
+    relic = Relic.GamblingChip;
+  } else if (relicString === "ginger") {
+    relic = Relic.Ginger;
+  } else if (relicString === "girya") {
+    relic = Relic.Girya;
+  } else if (relicString === "goldenidol") {
+    relic = Relic.GoldenIdol;
+  } else if (relicString === "goldeneye") {
+    relic = Relic.GoldenEye;
+  } else if (relicString === "gremlinhorn") {
+    relic = Relic.GremlinHorn;
+  } else if (relicString === "handdrill") {
+    relic = Relic.HandDrill;
+  } else if (relicString === "happyflower") {
+    relic = Relic.HappyFlower;
+  } else if (relicString === "holywater") {
+    relic = Relic.HolyWater;
+  } else if (relicString === "horncleat") {
+    relic = Relic.HornCleat;
+  } else if (relicString === "hoveringkite") {
+    relic = Relic.HoveringKite;
+  } else if (relicString === "icecream") {
+    relic = Relic.IceCream;
+  } else if (relicString === "incenseburner") {
+    relic = Relic.IncenseBurner;
+  } else if (relicString === "inkbottle") {
+    relic = Relic.InkBottle;
+  } else if (relicString === "inserter") {
+    relic = Relic.Inserter;
+  } else if (relicString === "juzubracelet") {
+    relic = Relic.JuzuBracelet;
+  } else if (relicString === "kunai") {
+    relic = Relic.Kunai;
+  } else if (relicString === "lantern") {
+    relic = Relic.Lantern;
+  } else if (relicString === "lee'swaffle") {
+    relic = Relic.LeesWaffle;
+  } else if (relicString === "letteropener") {
+    relic = Relic.LetterOpener;
+  } else if (relicString === "lizardtail") {
+    relic = Relic.LizardTail;
+  } else if (relicString === "magicflower") {
+    relic = Relic.MagicFlower;
+  } else if (relicString === "mango") {
+    relic = Relic.Mango;
+  } else if (relicString === "markofpain") {
+    relic = Relic.MarkOfPain;
+  } else if (relicString === "markofthebloom") {
+    relic = Relic.MarkOfTheBloom;
+  } else if (relicString === "matryoshka") {
+    relic = Relic.Matryoshka;
+  } else if (relicString === "mawbank") {
+    relic = Relic.MawBank;
+  } else if (relicString === "mealticket") {
+    relic = Relic.MealTicket;
+  } else if (relicString === "meatonthebone") {
+    relic = Relic.MeatOnTheBone;
+  } else if (relicString === "medicalkit") {
+    relic = Relic.MedicalKit;
+  } else if (relicString === "membershipcard") {
+    relic = Relic.MembershipCard;
+  } else if (relicString === "mercuryhourglass") {
+    relic = Relic.MercuryHourglass;
+  } else if (relicString === "moltenegg2") {
+    relic = Relic.MoltenEggTwo;
+  } else if (relicString === "mummifiedhand") {
+    relic = Relic.MummifiedHand;
+  } else if (relicString === "mutagenicstrength") {
+    relic = Relic.MutagenicStrength;
+  } else if (relicString === "necronomicon") {
+    relic = Relic.Necronomicon;
+  } else if (relicString === "neowsblessing") {
+    relic = Relic.NeowsBlessing;
+  } else if (relicString === "nilry'scodex") {
+    relic = Relic.NilrysCodex;
+  } else if (relicString === "ninjascroll") {
+    relic = Relic.NinjaScroll;
+  } else if (relicString === "nloth'sgift") {
+    relic = Relic.NlothsGift;
+  } else if (relicString === "nuclearbattery") {
+    relic = Relic.NuclearBattery;
+  } else if (relicString === "nunchaku") {
+    relic = Relic.Nunchaku;
+  } else if (relicString === "oddmushroom") {
+    relic = Relic.OddMushroom;
+  } else if (relicString === "oddlysmoothstone") {
+    relic = Relic.OddlySmoothStone;
+  } else if (relicString === "oldcoin") {
+    relic = Relic.OldCoin;
+  } else if (relicString === "omamori") {
+    relic = Relic.Omamori;
+  } else if (relicString === "orangepellets") {
+    relic = Relic.OrangePellets;
+  } else if (relicString === "orichalcum") {
+    relic = Relic.Orichalcum;
+  } else if (relicString === "ornamentalfan") {
+    relic = Relic.OrnamentalFan;
+  } else if (relicString === "orrery") {
+    relic = Relic.Orrery;
+  } else if (relicString === "pandora'sbox") {
+    relic = Relic.PandorasBox;
+  } else if (relicString === "pantograph") {
+    relic = Relic.Pantograph;
+  } else if (relicString === "papercrane") {
+    relic = Relic.PaperCrane;
+  } else if (relicString === "paperfrog") {
+    relic = Relic.PaperFrog;
+  } else if (relicString === "peacepipe") {
+    relic = Relic.PeacePipe;
+  } else if (relicString === "pear") {
+    relic = Relic.Pear;
+  } else if (relicString === "pennib") {
+    relic = Relic.PenNib;
+  } else if (relicString === "philosopher'sstone") {
+    relic = Relic.PhilosophersStone;
+  } else if (relicString === "pocketwatch") {
+    relic = Relic.Pocketwatch;
+  } else if (relicString === "potionbelt") {
+    relic = Relic.PotionBelt;
+  } else if (relicString === "prayerwheel") {
+    relic = Relic.PrayerWheel;
+  } else if (relicString === "preservedinsect") {
+    relic = Relic.PreservedInsect;
+  } else if (relicString === "purewater") {
+    relic = Relic.PureWater;
+  } else if (relicString === "questioncard") {
+    relic = Relic.QuestionCard;
+  } else if (relicString === "redmask") {
+    relic = Relic.RedMask;
+  } else if (relicString === "redskull") {
+    relic = Relic.RedSkull;
+  } else if (relicString === "regalpillow") {
+    relic = Relic.RegalPillow;
+  } else if (relicString === "ringoftheserpent") {
+    relic = Relic.RingOfTheSerpent;
+  } else if (relicString === "ringofthesnake") {
+    relic = Relic.RingofTheSnake;
+  } else if (relicString === "runiccapacitor") {
+    relic = Relic.RunicCapacitor;
+  } else if (relicString === "runiccube") {
+    relic = Relic.RunicCube;
+  } else if (relicString === "runicdome") {
+    relic = Relic.RunicDome;
+  } else if (relicString === "runicpyramid") {
+    relic = Relic.RunicPyramid;
+  } else if (relicString === "sacredbark") {
+    relic = Relic.SacredBark;
+  } else if (relicString === "selfformingclay") {
+    relic = Relic.SelfFormingClay;
+  } else if (relicString === "shovel") {
+    relic = Relic.Shovel;
+  } else if (relicString === "shuriken") {
+    relic = Relic.Shuriken;
+  } else if (relicString === "singingbowl") {
+    relic = Relic.SingingBowl;
+  } else if (relicString === "slaverscollar") {
+    relic = Relic.SlaversCollar;
+  } else if (relicString === "sling") {
+    relic = Relic.Sling;
+  } else if (relicString === "smilingmask") {
+    relic = Relic.SmilingMask;
+  } else if (relicString === "snakeskull") {
+    relic = Relic.SnakeSkull;
+  } else if (relicString === "sneckoeye") {
+    relic = Relic.SneckoEye;
+  } else if (relicString === "sozu") {
+    relic = Relic.Sozu;
+  } else if (relicString === "stonecalendar") {
+    relic = Relic.StoneCalendar;
+  } else if (relicString === "strangespoon") {
+    relic = Relic.StrangeSpoon;
+  } else if (relicString === "strawberry") {
+    relic = Relic.Strawberry;
+  } else if (relicString === "strikedummy") {
+    relic = Relic.StrikeDummy;
+  } else if (relicString === "sundial") {
+    relic = Relic.Sundial;
+  } else if (relicString === "symbioticvirus") {
+    relic = Relic.SymbioticVirus;
+  } else if (relicString === "teardroplocket") {
+    relic = Relic.TeardropLocket;
+  } else if (relicString === "thecourier") {
+    relic = Relic.TheCourier;
+  } else if (relicString === "thespecimen") {
+    relic = Relic.TheSpecimen;
+  } else if (relicString === "theabacus") {
+    relic = Relic.TheAbacus;
+  } else if (relicString === "threadandneedle") {
+    relic = Relic.ThreadAndNeedle;
+  } else if (relicString === "tingsha") {
+    relic = Relic.Tingsha;
+  } else if (relicString === "tinychest") {
+    relic = Relic.TinyChest;
+  } else if (relicString === "torii") {
+    relic = Relic.Torii;
+  } else if (relicString === "toughbandages") {
+    relic = Relic.ToughBandages;
+  } else if (relicString === "toxicegg2") {
+    relic = Relic.ToxicEggTwo;
+  } else if (relicString === "toyornithopter") {
+    relic = Relic.ToyOrnithopter;
+  } else if (relicString === "tungstenrod") {
+    relic = Relic.TungstenRod;
+  } else if (relicString === "turnip") {
+    relic = Relic.Turnip;
+  } else if (relicString === "twistedfunnel") {
+    relic = Relic.TwistedFunnel;
+  } else if (relicString === "unceasingtop") {
+    relic = Relic.UnceasingTop;
+  } else if (relicString === "vajra") {
+    relic = Relic.Vajra;
+  } else if (relicString === "velvetchoker") {
+    relic = Relic.VelvetChoker;
+  } else if (relicString === "violetlotus") {
+    relic = Relic.VioletLotus;
+  } else if (relicString === "warpaint") {
+    relic = Relic.WarPaint;
+  } else if (relicString === "warpedtongs") {
+    relic = Relic.WarpedTongs;
+  } else if (relicString === "whetstone") {
+    relic = Relic.Whetstone;
+  } else if (relicString === "whitebeaststatue") {
+    relic = Relic.WhiteBeastStatue;
+  } else if (relicString === "wingedgreaves") {
+    relic = Relic.WingedGreaves;
+  } else if (relicString === "wristblade") {
+    relic = Relic.WristBlade;
+  } else {
+    console.log("unexpected relic: ", relicString);
+  }
+  return relic;
 }
 
 function parseBossRelic(bossRelicString: string): BossRelic {
