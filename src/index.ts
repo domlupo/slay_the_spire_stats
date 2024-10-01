@@ -15,7 +15,7 @@ type StsFile = {
   relics: Relic[];
   floorsPotionsUsed: number[];
   // TODO: damage_taken
-  // TODO: potions_obtained
+  potionsObtained: PotionObtained[];
   floorPaths: FloorPath[];
   // TODO: items_purchased
   campfireRests: number;
@@ -231,6 +231,57 @@ enum Relic {
   WhiteBeastStatue,
   WingedGreaves,
   WristBlade,
+}
+
+type PotionObtained = {
+  floor: number;
+  potion: Potion;
+};
+
+enum Potion {
+  Error,
+  Ambrosia,
+  Ancient,
+  Attack,
+  BlessingOfTheForge,
+  Block,
+  Blood,
+  BottledMiracle,
+  Colorless,
+  Cultist,
+  Cunning,
+  Dexterity,
+  DistilledChaos,
+  Duplication,
+  Elixir,
+  Energy,
+  EntropicBrew,
+  EssenceOfDarkness,
+  EssenceOfSteel,
+  Explosive,
+  Fairy,
+  Fear,
+  Fire,
+  Focus,
+  FruitJuice,
+  GamblersBrew,
+  GhostInAJar,
+  HeartOfIron,
+  LiquidBronze,
+  LiquidMemories,
+  Poison,
+  PotionOfCapacity,
+  Power,
+  Regen,
+  Skill,
+  SmokeBomb,
+  SneckoOil,
+  Speed,
+  Stance,
+  Steroid,
+  Strength,
+  Swift,
+  Weak,
 }
 
 enum FloorPath {
@@ -806,6 +857,103 @@ function parseFile(file: string): StsFile {
     }
   }
 
+  let potionsObtained: PotionObtained[] = [];
+  for (let i = 0; i < json.potions_obtained.length; i++) {
+    let potion = Potion.Error;
+    let potionString: string = json.potions_obtained[i].key;
+    if (potionString === "Ambrosia") {
+      potion = Potion.Ambrosia;
+    } else if (potionString === "Ancient Potion") {
+      potion = Potion.Ancient;
+    } else if (potionString === "AttackPotion") {
+      potion = Potion.Attack;
+    } else if (potionString === "BlessingOfTheForge") {
+      potion = Potion.BlessingOfTheForge;
+    } else if (potionString === "Block Potion") {
+      potion = Potion.Block;
+    } else if (potionString === "BloodPotion") {
+      potion = Potion.Blood;
+    } else if (potionString === "BottledMiracle") {
+      potion = Potion.BottledMiracle;
+    } else if (potionString === "ColorlessPotion") {
+      potion = Potion.Colorless;
+    } else if (potionString === "CultistPotion") {
+      potion = Potion.Cultist;
+    } else if (potionString === "CunningPotion") {
+      potion = Potion.Cunning;
+    } else if (potionString === "Dexterity Potion") {
+      potion = Potion.Dexterity;
+    } else if (potionString === "DistilledChaos") {
+      potion = Potion.DistilledChaos;
+    } else if (potionString === "DuplicationPotion") {
+      potion = Potion.Duplication;
+    } else if (potionString === "ElixirPotion") {
+      potion = Potion.Elixir;
+    } else if (potionString === "Energy Potion") {
+      potion = Potion.Energy;
+    } else if (potionString === "EntropicBrew") {
+      potion = Potion.EntropicBrew;
+    } else if (potionString === "EssenceOfDarkness") {
+      potion = Potion.EssenceOfDarkness;
+    } else if (potionString === "EssenceOfSteel") {
+      potion = Potion.EssenceOfSteel;
+    } else if (potionString === "Explosive Potion") {
+      potion = Potion.Explosive;
+    } else if (potionString === "FairyPotion") {
+      potion = Potion.Fairy;
+    } else if (potionString === "FearPotion") {
+      potion = Potion.Fear;
+    } else if (potionString === "Fire Potion") {
+      potion = Potion.Fire;
+    } else if (potionString === "FocusPotion") {
+      potion = Potion.Focus;
+    } else if (potionString === "Fruit Juice") {
+      potion = Potion.FruitJuice;
+    } else if (potionString === "GamblersBrew") {
+      potion = Potion.GamblersBrew;
+    } else if (potionString === "GhostInAJar") {
+      potion = Potion.GhostInAJar;
+    } else if (potionString === "HeartOfIron") {
+      potion = Potion.HeartOfIron;
+    } else if (potionString === "LiquidBronze") {
+      potion = Potion.LiquidBronze;
+    } else if (potionString === "LiquidMemories") {
+      potion = Potion.LiquidMemories;
+    } else if (potionString === "Poison Potion") {
+      potion = Potion.Poison;
+    } else if (potionString === "PotionOfCapacity") {
+      potion = Potion.PotionOfCapacity;
+    } else if (potionString === "PowerPotion") {
+      potion = Potion.Power;
+    } else if (potionString === "Regen Potion") {
+      potion = Potion.Regen;
+    } else if (potionString === "SkillPotion") {
+      potion = Potion.Skill;
+    } else if (potionString === "SmokeBomb") {
+      potion = Potion.SmokeBomb;
+    } else if (potionString === "SneckoOil") {
+      potion = Potion.SneckoOil;
+    } else if (potionString === "SpeedPotion") {
+      potion = Potion.Speed;
+    } else if (potionString === "StancePotion") {
+      potion = Potion.Stance;
+    } else if (potionString === "SteroidPotion") {
+      potion = Potion.Steroid;
+    } else if (potionString === "Strength Potion") {
+      potion = Potion.Strength;
+    } else if (potionString === "Swift Potion") {
+      potion = Potion.Swift;
+    } else if (potionString === "Weak Potion") {
+      potion = Potion.Weak;
+    } else {
+      console.log("unexpected potion: " + potionString);
+    }
+    potionsObtained.push({
+      potion,
+      floor: json.potions_obtained[i].floor,
+    });
+  }
+
   let neowBonus: NeowBonus = NeowBonus.Error;
   let neowBonusString: string = json.neow_bonus;
   if (neowBonusString === "") {
@@ -962,6 +1110,7 @@ function parseFile(file: string): StsFile {
     neowCost: json.neow_cost,
     relics,
     floorsPotionsUsed: json.potions_floor_usage,
+    potionsObtained,
     floorPaths,
     campfireRests: json.campfire_rested,
     floorsItemsPurchased: json.item_purchase_floors,
