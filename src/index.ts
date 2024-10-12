@@ -33,7 +33,7 @@ type StsFile = {
   purgesPurchased: number;
   won: boolean;
   floorsMaxHp: number[];
-  // TODO: card_choices
+  cardChoices: CardChoice[];
   relicsObtained: RelicObtained[];
   // TODO: event_choices
   bossRelicChoices: BossRelicChoice[];
@@ -50,6 +50,19 @@ enum Character {
   Silent,
   Defect,
   Watcher,
+}
+
+type CardChoice = {
+  picked?: Card;
+  notPicked: Card[];
+  floor: number;
+  selection: Selection;
+};
+
+enum Selection {
+  Card,
+  Skip,
+  SingingBowl,
 }
 
 type Card = {
@@ -88,6 +101,7 @@ enum CardName {
   BattleTrance,
   BattleHymn,
   BeamCell,
+  Berserk,
   Beta,
   BiasedCognition,
   Bite,
@@ -117,6 +131,7 @@ enum CardName {
   Chaos,
   Chill,
   Choke,
+  Chrysalis,
   Clash,
   ClearTheMind,
   Cleave,
@@ -152,6 +167,7 @@ enum CardName {
   DeadlyPoison,
   Decay,
   DeceiveReality,
+  DeepBreath,
   Defend,
   Deflect,
   Defragment,
@@ -161,6 +177,7 @@ enum CardName {
   Devotion,
   DieDieDie,
   Disarm,
+  Discovery,
   Distraction,
   DodgeAndRoll,
   DoomAndGloom,
@@ -168,6 +185,7 @@ enum CardName {
   DoubleEnergy,
   DoubleTap,
   Doubt,
+  DramaticEntrance,
   Dropkick,
   DualWield,
   Dualcast,
@@ -177,6 +195,7 @@ enum CardName {
   EmptyFist,
   EmptyMind,
   EndlessAgony,
+  Enlightenment,
   Entrench,
   Envenom,
   Eruption,
@@ -195,6 +214,7 @@ enum CardName {
   FiendFire,
   Finesse,
   Finisher,
+  FireBreathing,
   Fission,
   FlameBarrier,
   Flechettes,
@@ -249,15 +269,19 @@ enum CardName {
   Loop,
   MachineLearning,
   Madness,
+  Magnetism,
   Malaise,
   MasterOfStrategy,
   MasterfulStab,
   MasterReality,
+  Mayhem,
   Meditate,
   Melter,
   MentalFortress,
   Metallicize,
+  Metamorphosis,
   MeteorStrike,
+  MindBlast,
   MultiCast,
   Necronomicurse,
   Neutralize,
@@ -282,11 +306,13 @@ enum CardName {
   Pray,
   Predator,
   Prepared,
+  PressurePoints,
   Prostrate,
   Protect,
   Pummel,
   Purity,
   QuickSlash,
+  Rage,
   Ragnarok,
   Rainbow,
   Rampage,
@@ -303,6 +329,7 @@ enum CardName {
   RiddleWithHoles,
   RipAndTear,
   Rupture,
+  SadisticNature,
   Sanctity,
   SandsOfTime,
   SashWhip,
@@ -320,6 +347,7 @@ enum CardName {
   SeverSoul,
   Shockwave,
   ShrugItOff,
+  SignatureMove,
   Skewer,
   Skim,
   Slice,
@@ -373,6 +401,7 @@ enum CardName {
   Whirlwind,
   WhiteNoise,
   WildStrike,
+  Wish,
   WindmillStrike,
   Wireheading,
   Worship,
@@ -1044,6 +1073,36 @@ function parseFile(file: string): StsFile {
     console.log("unexpected neow bonus: ", neowBonus);
   }
 
+  let cardChoices: CardChoice[] = [];
+  for (let i = 0; i < json.card_choices.length; i++) {
+    let notPicked: Card[] = [];
+    for (let j = 0; j < json.card_choices[i].not_picked.length; j++) {
+      notPicked.push(parseCard(json.card_choices[i].not_picked[j]));
+    }
+
+    let floor: number = json.card_choices[i].floor;
+    if (json.card_choices[i].picked === "SKIP") {
+      cardChoices.push({
+        notPicked,
+        floor,
+        selection: Selection.Skip,
+      });
+    } else if (json.card_choices[i].picked == "Singing Bowl") {
+      cardChoices.push({
+        notPicked,
+        floor,
+        selection: Selection.SingingBowl,
+      });
+    } else {
+      cardChoices.push({
+        picked: parseCard(json.card_choices[i].picked),
+        notPicked,
+        floor,
+        selection: Selection.Card,
+      });
+    }
+  }
+
   let relicsObtained: RelicObtained[] = [];
   for (let i = 0; i < json.relics_obtained.length; i++) {
     relicsObtained.push({
@@ -1089,6 +1148,7 @@ function parseFile(file: string): StsFile {
     purgesPurchased: json.purchased_purges,
     won: json.victory,
     floorsMaxHp: json.max_hp_per_floor,
+    cardChoices,
     relicsObtained,
     bossRelicChoices,
     floorsItemPurged: json.items_purged_floors,
@@ -1181,6 +1241,8 @@ function parseCard(cardString: undefined | string): Card {
     name = CardName.BattleHymn;
   } else if (cardName(cardString, "beamcell")) {
     name = CardName.BeamCell;
+  } else if (cardName(cardString, "berserk")) {
+    name = CardName.Berserk;
   } else if (cardName(cardString, "beta")) {
     name = CardName.Beta;
   } else if (cardName(cardString, "biasedcognition")) {
@@ -1239,6 +1301,8 @@ function parseCard(cardString: undefined | string): Card {
     name = CardName.Chill;
   } else if (cardName(cardString, "choke")) {
     name = CardName.Choke;
+  } else if (cardName(cardString, "chrysalis")) {
+    name = CardName.Chrysalis;
   } else if (cardName(cardString, "clash")) {
     name = CardName.Clash;
   } else if (cardName(cardString, "clearthemind")) {
@@ -1309,6 +1373,8 @@ function parseCard(cardString: undefined | string): Card {
     name = CardName.Decay;
   } else if (cardName(cardString, "deceivereality")) {
     name = CardName.DeceiveReality;
+  } else if (cardName(cardString, "deepbreath")) {
+    name = CardName.DeepBreath;
   } else if (
     cardName(cardString, "defend_b") ||
     cardName(cardString, "defend_r") ||
@@ -1332,6 +1398,8 @@ function parseCard(cardString: undefined | string): Card {
     name = CardName.DieDieDie;
   } else if (cardName(cardString, "disarm")) {
     name = CardName.Disarm;
+  } else if (cardName(cardString, "discovery")) {
+    name = CardName.Discovery;
   } else if (cardName(cardString, "distraction")) {
     name = CardName.Distraction;
   } else if (cardName(cardString, "dodgeandroll")) {
@@ -1346,6 +1414,8 @@ function parseCard(cardString: undefined | string): Card {
     name = CardName.DoubleTap;
   } else if (cardName(cardString, "doubt")) {
     name = CardName.Doubt;
+  } else if (cardName(cardString, "dramaticentrance")) {
+    name = CardName.DramaticEntrance;
   } else if (cardName(cardString, "dropkick")) {
     name = CardName.Dropkick;
   } else if (cardName(cardString, "dualwield")) {
@@ -1364,6 +1434,8 @@ function parseCard(cardString: undefined | string): Card {
     name = CardName.EmptyMind;
   } else if (cardName(cardString, "endlessagony")) {
     name = CardName.EndlessAgony;
+  } else if (cardName(cardString, "enlightenment")) {
+    name = CardName.Enlightenment;
   } else if (cardName(cardString, "entrench")) {
     name = CardName.Entrench;
   } else if (cardName(cardString, "envenom")) {
@@ -1400,6 +1472,8 @@ function parseCard(cardString: undefined | string): Card {
     name = CardName.Finesse;
   } else if (cardName(cardString, "finisher")) {
     name = CardName.Finisher;
+  } else if (cardName(cardString, "firebreathing")) {
+    name = CardName.FireBreathing;
   } else if (cardName(cardString, "fission")) {
     name = CardName.Fission;
   } else if (cardName(cardString, "flamebarrier")) {
@@ -1510,12 +1584,16 @@ function parseCard(cardString: undefined | string): Card {
     name = CardName.Madness;
   } else if (cardName(cardString, "malaise")) {
     name = CardName.Malaise;
+  } else if (cardName(cardString, "magnetism")) {
+    name = CardName.Magnetism;
   } else if (cardName(cardString, "masterofstrategy")) {
     name = CardName.MasterOfStrategy;
   } else if (cardName(cardString, "masterfulstab")) {
     name = CardName.MasterfulStab;
   } else if (cardName(cardString, "masterreality")) {
     name = CardName.MasterReality;
+  } else if (cardName(cardString, "mayhem")) {
+    name = CardName.Mayhem;
   } else if (cardName(cardString, "meditate")) {
     name = CardName.Meditate;
   } else if (cardName(cardString, "melter")) {
@@ -1524,8 +1602,12 @@ function parseCard(cardString: undefined | string): Card {
     name = CardName.MentalFortress;
   } else if (cardName(cardString, "metallicize")) {
     name = CardName.Metallicize;
+  } else if (cardName(cardString, "metamorphosis")) {
+    name = CardName.Metamorphosis;
   } else if (cardName(cardString, "meteorstrike")) {
     name = CardName.MeteorStrike;
+  } else if (cardName(cardString, "mindblast")) {
+    name = CardName.MindBlast;
   } else if (cardName(cardString, "multi-cast")) {
     name = CardName.MultiCast;
   } else if (cardName(cardString, "necronomicurse")) {
@@ -1554,6 +1636,8 @@ function parseCard(cardString: undefined | string): Card {
     name = CardName.PanicButton;
   } else if (cardName(cardString, "parasite")) {
     name = CardName.Parasite;
+  } else if (cardName(cardString, "pathtovictory")) {
+    name = CardName.PressurePoints;
   } else if (cardName(cardString, "perfectedstrike")) {
     name = CardName.PerfectedStrike;
   } else if (cardName(cardString, "perseverance")) {
@@ -1584,6 +1668,8 @@ function parseCard(cardString: undefined | string): Card {
     name = CardName.Purity;
   } else if (cardName(cardString, "quickslash")) {
     name = CardName.QuickSlash;
+  } else if (cardName(cardString, "rage")) {
+    name = CardName.Rage;
   } else if (cardName(cardString, "ragnarok")) {
     name = CardName.Ragnarok;
   } else if (cardName(cardString, "rainbow")) {
@@ -1616,6 +1702,8 @@ function parseCard(cardString: undefined | string): Card {
     name = CardName.RipAndTear;
   } else if (cardName(cardString, "rupture")) {
     name = CardName.Rupture;
+  } else if (cardName(cardString, "sadisticnature")) {
+    name = CardName.SadisticNature;
   } else if (cardName(cardString, "sanctity")) {
     name = CardName.Sanctity;
   } else if (cardName(cardString, "sandsoftime")) {
@@ -1650,6 +1738,8 @@ function parseCard(cardString: undefined | string): Card {
     name = CardName.Shockwave;
   } else if (cardName(cardString, "shrugitoff")) {
     name = CardName.ShrugItOff;
+  } else if (cardName(cardString, "signaturemove")) {
+    name = CardName.SignatureMove;
   } else if (cardName(cardString, "skewer")) {
     name = CardName.Skewer;
   } else if (cardName(cardString, "skim")) {
@@ -1761,6 +1851,8 @@ function parseCard(cardString: undefined | string): Card {
     name = CardName.WhiteNoise;
   } else if (cardName(cardString, "wildstrike")) {
     name = CardName.WildStrike;
+  } else if (cardName(cardString, "wish")) {
+    name = CardName.Wish;
   } else if (cardName(cardString, "windmillstrike")) {
     name = CardName.WindmillStrike;
   } else if (cardName(cardString, "wireheading")) {
