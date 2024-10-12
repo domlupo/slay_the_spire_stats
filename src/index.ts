@@ -2525,35 +2525,35 @@ function graphTotals(files: StsFile[]) {
   let defectLosses: number = 0;
   let watcherLosses: number = 0;
 
-  let ironcladCardsPicked: number = 0;
-  let silentCardsPicked: number = 0;
-  let defectCardsPicked: number = 0;
-  let watcherCardsPicked: number = 0;
+  let ironcladCardPicks: number = 0;
+  let silentCardPicks: number = 0;
+  let defectCardPicks: number = 0;
+  let watcherCardPicks: number = 0;
 
-  let ironcladCardsSkipped: number = 0;
-  let silentCardsSkipped: number = 0;
-  let defectCardsSkipped: number = 0;
-  let watcherCardsSkipped: number = 0;
+  let ironcladCardSkips: number = 0;
+  let silentCardSkips: number = 0;
+  let defectCardSkips: number = 0;
+  let watcherCardSkips: number = 0;
 
   let ironcladPotionsUsed: number = 0;
   let silentPotionsUsed: number = 0;
   let defectPotionsUsed: number = 0;
   let watcherPotionsUsed: number = 0;
 
-  let ironcladCardsBought: number = 0;
-  let silentCardsBought: number = 0;
-  let defectCardsBought: number = 0;
-  let watcherCardsBought: number = 0;
+  let ironcladCardsPurchased: number = 0;
+  let silentCardsPurchased: number = 0;
+  let defectCardsPurchased: number = 0;
+  let watcherCardsPurchased: number = 0;
 
-  let ironcladRelicsBought: number = 0;
-  let silentRelicsBought: number = 0;
-  let defectRelicsBought: number = 0;
-  let watcherRelicsBought: number = 0;
+  let ironcladRelicsPurchased: number = 0;
+  let silentRelicsPurchased: number = 0;
+  let defectRelicsPurchased: number = 0;
+  let watcherRelicsPurchased: number = 0;
 
-  let ironcladPotionsBought: number = 0;
-  let silentPotionsBought: number = 0;
-  let defectPotionsBought: number = 0;
-  let watcherPotionsBought: number = 0;
+  let ironcladPotionsPurchased: number = 0;
+  let silentPotionsPurchased: number = 0;
+  let defectPotionsPurchased: number = 0;
+  let watcherPotionsPurchased: number = 0;
 
   for (let i = 0; i < files.length; i++) {
     let file = files[i];
@@ -2561,12 +2561,12 @@ function graphTotals(files: StsFile[]) {
     let damageTaken = 0;
     let turnsTaken = 0;
     let won = file.won;
-    let cardsPicked = 0;
-    let cardsSkipped = 0;
+    let cardPicks = 0;
+    let cardSkips = 0;
     let potionsUsed = file.floorsPotionsUsed.length;
-    let cardsBought = 0;
-    let relicsBought = 0;
-    let potionsBought = 0;
+    let cardsPurchased = 0;
+    let relicsPurchased = 0;
+    let potionsPurchased = 0;
 
     for (let j = 0; j < file.damageTaken.length; j++) {
       damageTaken += file.damageTaken[j].damage;
@@ -2576,32 +2576,32 @@ function graphTotals(files: StsFile[]) {
     for (let j = 0; j < file.cardChoices.length; j++) {
       let selection = file.cardChoices[j].selection;
       if (selection === CardSelection.Card) {
-        cardsPicked += 1;
+        cardPicks += 1;
       } else if (selection === CardSelection.Skip) {
-        cardsSkipped += 1;
+        cardSkips += 1;
       }
     }
 
     for (let j = 0; j < file.itemsPurchased.length; j++) {
       let itemPurchased = file.itemsPurchased[j];
       if (itemPurchased.selection == ItemSelection.Card) {
-        cardsBought += 1;
+        cardsPurchased += 1;
       } else if (itemPurchased.selection === ItemSelection.Relic) {
-        relicsBought += 1;
+        relicsPurchased += 1;
       } else if (itemPurchased.selection === ItemSelection.Potion) {
-        potionsBought += 1;
+        potionsPurchased += 1;
       }
     }
 
     if (character === Character.Ironclad) {
       ironcladDamageTaken += damageTaken;
       ironcladTurnsTaken += turnsTaken;
-      ironcladCardsPicked += cardsPicked;
-      ironcladCardsSkipped += cardsSkipped;
+      ironcladCardPicks += cardPicks;
+      ironcladCardSkips += cardSkips;
       ironcladPotionsUsed += potionsUsed;
-      ironcladCardsBought += cardsBought;
-      ironcladRelicsBought += relicsBought;
-      ironcladPotionsBought += potionsBought;
+      ironcladCardsPurchased += cardsPurchased;
+      ironcladRelicsPurchased += relicsPurchased;
+      ironcladPotionsPurchased += potionsPurchased;
       if (won) {
         ironcladWins += 1;
       } else {
@@ -2610,12 +2610,12 @@ function graphTotals(files: StsFile[]) {
     } else if (character === Character.Silent) {
       silentDamageTaken += damageTaken;
       silentTurnsTaken += turnsTaken;
-      silentCardsPicked += cardsPicked;
-      silentCardsSkipped += cardsSkipped;
+      silentCardPicks += cardPicks;
+      silentCardSkips += cardSkips;
       silentPotionsUsed += potionsUsed;
-      silentCardsBought += cardsBought;
-      silentRelicsBought += relicsBought;
-      silentPotionsBought += potionsBought;
+      silentCardsPurchased += cardsPurchased;
+      silentRelicsPurchased += relicsPurchased;
+      silentPotionsPurchased += potionsPurchased;
       if (won) {
         silentWins += 1;
       } else {
@@ -2624,26 +2624,28 @@ function graphTotals(files: StsFile[]) {
     } else if (character === Character.Defect) {
       defectDamageTaken += damageTaken;
       defectTurnsTaken += turnsTaken;
-      defectCardsPicked += cardsPicked;
-      defectCardsSkipped += cardsSkipped;
+      defectCardPicks += cardPicks;
+      defectCardSkips += cardSkips;
       defectPotionsUsed += potionsUsed;
-      defectCardsBought += cardsBought;
-      defectRelicsBought += relicsBought;
-      defectPotionsBought += potionsBought;
+      defectCardsPurchased += cardsPurchased;
+      defectRelicsPurchased += relicsPurchased;
+      defectPotionsPurchased += potionsPurchased;
       if (won) {
         defectWins += 1;
       } else {
         defectLosses += 1;
       }
     } else if (character === Character.Watcher) {
+      // Hack to handle blasphemy. TODO: handle this edge case better this probably causes bugs.
+      damageTaken = damageTaken % 100000;
       watcherDamageTaken += damageTaken;
       watcherTurnsTaken += turnsTaken;
-      watcherCardsPicked += cardsPicked;
-      watcherCardsSkipped += cardsSkipped;
+      watcherCardPicks += cardPicks;
+      watcherCardSkips += cardSkips;
       watcherPotionsUsed += potionsUsed;
-      watcherCardsBought += cardsBought;
-      watcherRelicsBought += relicsBought;
-      watcherPotionsBought += potionsBought;
+      watcherCardsPurchased += cardsPurchased;
+      watcherRelicsPurchased += relicsPurchased;
+      watcherPotionsPurchased += potionsPurchased;
       if (won) {
         watcherWins += 1;
       } else {
@@ -2651,6 +2653,283 @@ function graphTotals(files: StsFile[]) {
       }
     }
   }
+
+  let damageTakenData = [
+    { damageTaken: "Ironclad Damage Taken", count: ironcladDamageTaken },
+    { damageTaken: "Silent Damage Taken", count: silentDamageTaken },
+    { damageTaken: "Defect Damage Taken", count: defectDamageTaken },
+    { damageTaken: "Watcher Damage Taken", count: watcherDamageTaken },
+  ];
+  new Chart(document.getElementById("totalDamageTaken")!, {
+    type: "doughnut",
+    data: {
+      labels: damageTakenData.map((row) => row.damageTaken),
+      datasets: [
+        {
+          label: "Damage",
+          data: damageTakenData.map((row) => row.count),
+          backgroundColor: [
+            "rgb(255, 102, 102)",
+            "rgb(102, 255, 178)",
+            "rgb(102, 178, 255)",
+            "rgb(178, 102, 255)",
+          ],
+        },
+      ],
+    },
+  });
+
+  let turnData = [
+    { turnsTaken: "Ironclad Turns", count: ironcladTurnsTaken },
+    { turnsTaken: "Silent Turns", count: silentTurnsTaken },
+    { turnsTaken: "Defect Turns", count: defectTurnsTaken },
+    { turnsTaken: "Watcher Turns", count: watcherTurnsTaken },
+  ];
+  new Chart(document.getElementById("totalTurns")!, {
+    type: "doughnut",
+    data: {
+      labels: turnData.map((row) => row.turnsTaken),
+      datasets: [
+        {
+          label: "Turns",
+          data: turnData.map((row) => row.count),
+          backgroundColor: [
+            "rgb(255, 102, 102)",
+            "rgb(102, 255, 178)",
+            "rgb(102, 178, 255)",
+            "rgb(178, 102, 255)",
+          ],
+        },
+      ],
+    },
+  });
+
+  let winData = [
+    { wins: "Ironclad Wins", count: ironcladWins },
+    { wins: "Silent Wins", count: silentWins },
+    { wins: "Defect Wins", count: defectWins },
+    { wins: "Watcher Wins", count: watcherWins },
+  ];
+  new Chart(document.getElementById("totalWins")!, {
+    type: "doughnut",
+    data: {
+      labels: winData.map((row) => row.wins),
+      datasets: [
+        {
+          label: "Wins",
+          data: winData.map((row) => row.count),
+          backgroundColor: [
+            "rgb(255, 102, 102)",
+            "rgb(102, 255, 178)",
+            "rgb(102, 178, 255)",
+            "rgb(178, 102, 255)",
+          ],
+        },
+      ],
+    },
+  });
+
+  let lossesData = [
+    { losses: "Ironclad Losses", count: ironcladLosses },
+    { losses: "Silent Losses", count: silentLosses },
+    { losses: "Defect Losses", count: defectLosses },
+    { losses: "Watcher Losses", count: watcherLosses },
+  ];
+  new Chart(document.getElementById("totalLosses")!, {
+    type: "doughnut",
+    data: {
+      labels: lossesData.map((row) => row.losses),
+      datasets: [
+        {
+          label: "Losses",
+          data: lossesData.map((row) => row.count),
+          backgroundColor: [
+            "rgb(255, 102, 102)",
+            "rgb(102, 255, 178)",
+            "rgb(102, 178, 255)",
+            "rgb(178, 102, 255)",
+          ],
+        },
+      ],
+    },
+  });
+
+  let cardPicksData = [
+    { cardPicks: "Ironclad Card Picks", count: ironcladCardPicks },
+    { cardPicks: "Silent Card Picks", count: silentCardPicks },
+    { cardPicks: "Defect Card Picks", count: defectCardPicks },
+    { cardPicks: "Watcher Card Picsk", count: watcherCardPicks },
+  ];
+  new Chart(document.getElementById("totalCardPicks")!, {
+    type: "doughnut",
+    data: {
+      labels: cardPicksData.map((row) => row.cardPicks),
+      datasets: [
+        {
+          label: "Card Picks",
+          data: cardPicksData.map((row) => row.count),
+          backgroundColor: [
+            "rgb(255, 102, 102)",
+            "rgb(102, 255, 178)",
+            "rgb(102, 178, 255)",
+            "rgb(178, 102, 255)",
+          ],
+        },
+      ],
+    },
+  });
+
+  let cardSkipsData = [
+    { cardSkips: "Ironclad Card Skips", count: ironcladCardSkips },
+    { cardSkips: "Silent Card Skips", count: silentCardSkips },
+    { cardSkips: "Defect Card Skips", count: defectCardSkips },
+    { cardSkips: "Watcher Card SKips", count: watcherCardSkips },
+  ];
+  new Chart(document.getElementById("totalCardSkips")!, {
+    type: "doughnut",
+    data: {
+      labels: cardSkipsData.map((row) => row.cardSkips),
+      datasets: [
+        {
+          label: "Card Skips",
+          data: cardSkipsData.map((row) => row.count),
+          backgroundColor: [
+            "rgb(255, 102, 102)",
+            "rgb(102, 255, 178)",
+            "rgb(102, 178, 255)",
+            "rgb(178, 102, 255)",
+          ],
+        },
+      ],
+    },
+  });
+
+  let potionsUsedData = [
+    { potionsUsed: "Ironclad Potions Used", count: ironcladPotionsUsed },
+    { potionsUsed: "Silent Potions Used", count: silentPotionsUsed },
+    { potionsUsed: "Defect Potions Used", count: defectPotionsUsed },
+    { potionsUsed: "Watcher Potions Used", count: watcherPotionsUsed },
+  ];
+  new Chart(document.getElementById("totalPotionsUsed")!, {
+    type: "doughnut",
+    data: {
+      labels: potionsUsedData.map((row) => row.potionsUsed),
+      datasets: [
+        {
+          label: "Potions Used",
+          data: potionsUsedData.map((row) => row.count),
+          backgroundColor: [
+            "rgb(255, 102, 102)",
+            "rgb(102, 255, 178)",
+            "rgb(102, 178, 255)",
+            "rgb(178, 102, 255)",
+          ],
+        },
+      ],
+    },
+  });
+
+  let cardsPurchasedData = [
+    {
+      cardsPurchased: "Ironclad Cards Purchased",
+      count: ironcladCardsPurchased,
+    },
+    { cardsPurchased: "Silent Cards Purchased", count: silentCardsPurchased },
+    { cardsPurchased: "Defect Cards Purchased", count: defectCardsPurchased },
+    { cardsPurchased: "Watcher Cards Purchased", count: watcherCardsPurchased },
+  ];
+  new Chart(document.getElementById("totalCardsPurchased")!, {
+    type: "doughnut",
+    data: {
+      labels: cardsPurchasedData.map((row) => row.cardsPurchased),
+      datasets: [
+        {
+          label: "Cards Purchased",
+          data: cardsPurchasedData.map((row) => row.count),
+          backgroundColor: [
+            "rgb(255, 102, 102)",
+            "rgb(102, 255, 178)",
+            "rgb(102, 178, 255)",
+            "rgb(178, 102, 255)",
+          ],
+        },
+      ],
+    },
+  });
+
+  let relicsPurchasedData = [
+    {
+      relicsPurchased: "Ironclad Relics Purchased",
+      count: ironcladRelicsPurchased,
+    },
+    {
+      relicsPurchased: "Silent Relics Purchased",
+      count: silentRelicsPurchased,
+    },
+    {
+      relicsPurchased: "Defect Relics Purchased",
+      count: defectRelicsPurchased,
+    },
+    {
+      relicsPurchased: "Watcher Relics Purchased",
+      count: watcherRelicsPurchased,
+    },
+  ];
+  new Chart(document.getElementById("totalRelicsPurchased")!, {
+    type: "doughnut",
+    data: {
+      labels: relicsPurchasedData.map((row) => row.relicsPurchased),
+      datasets: [
+        {
+          label: "Relics Purchased",
+          data: relicsPurchasedData.map((row) => row.count),
+          backgroundColor: [
+            "rgb(255, 102, 102)",
+            "rgb(102, 255, 178)",
+            "rgb(102, 178, 255)",
+            "rgb(178, 102, 255)",
+          ],
+        },
+      ],
+    },
+  });
+
+  let potionsPurchasedData = [
+    {
+      potionsPurchased: "Ironclad Potions Purchased",
+      count: ironcladPotionsPurchased,
+    },
+    {
+      potionsPurchased: "Silent Potions Purchased",
+      count: silentPotionsPurchased,
+    },
+    {
+      potionsPurchased: "Defect Potions Purchased",
+      count: defectPotionsPurchased,
+    },
+    {
+      potionsPurchased: "Watcher Potions Purchased",
+      count: watcherPotionsPurchased,
+    },
+  ];
+  new Chart(document.getElementById("totalPotionsPurchased")!, {
+    type: "doughnut",
+    data: {
+      labels: potionsPurchasedData.map((row) => row.potionsPurchased),
+      datasets: [
+        {
+          label: "Potions Purchased",
+          data: potionsPurchasedData.map((row) => row.potionsPurchased),
+          backgroundColor: [
+            "rgb(255, 102, 102)",
+            "rgb(102, 255, 178)",
+            "rgb(102, 178, 255)",
+            "rgb(178, 102, 255)",
+          ],
+        },
+      ],
+    },
+  });
 }
 
 function graph(files: StsFile[]) {
