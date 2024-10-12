@@ -14,7 +14,7 @@ type StsFile = {
   // TODO: master_deck
   relics: Relic[]; // TODO: verify what is relic start is it [] or undefined
   floorsPotionsUsed: number[];
-  // TODO: damage_taken
+  damageTaken: DamageTaken[];
   potionsObtained: PotionObtained[];
   floorPaths: FloorPath[];
   // TODO: items_purchased
@@ -40,7 +40,7 @@ type StsFile = {
   floorsItemPurged: number[];
   isEndless: boolean;
   floorsPotionsSpawned: number[];
-  killedBy: KilledBy;
+  killedBy: Battle;
   ascensionLevel: number;
 };
 
@@ -233,6 +233,13 @@ enum Relic {
   WristBlade,
 }
 
+type DamageTaken = {
+  damage: number;
+  enemies: Battle;
+  floor: number;
+  turns: number;
+};
+
 type PotionObtained = {
   floor: number;
   potion: Potion;
@@ -365,14 +372,20 @@ enum BossRelic {
   WristBlade,
 }
 
-enum KilledBy {
+enum Battle {
   None,
   Error,
+  TwoFungiBeasts,
+  TwoLouse,
   TwoOrbWalkers,
+  TwoTheives,
   ThreeByrds,
   ThreeCultists,
   ThreeDarklings,
+  ThreeLouse,
   ThreeSentries,
+  ThreeShapes,
+  FourShapes,
   Automaton,
   AwakenedOne,
   BlueSlaver,
@@ -382,6 +395,8 @@ enum KilledBy {
   Chosen,
   ChosenAndByrds,
   Collector,
+  ColosseumNobs,
+  ColosseumSlavers,
   Cultist,
   CultistAndChosen,
   DonuAndDeca,
@@ -392,20 +407,38 @@ enum KilledBy {
   GremlinLeader,
   GremlinNob,
   Hexaghost,
+  JawWorm,
+  JawWormHorde,
   Lagavulin,
+  LagavulinEvent,
+  LargeSlime,
+  Looter,
+  LotsOfSlimes,
   MaskedBandits,
+  Maw,
+  MindBloomBossBattle,
   Nemesis,
+  OrbWalker,
+  RedSlaver,
   Reptomancer,
+  SentryAndSphere,
+  ShellParasite,
   ShelledParasiteAndFungi,
   ShieldAndSpear,
   Slavers,
   SlimeBoss,
+  SmallSlimes,
   SnakePlant,
+  Snecko,
   SphereAndTwoShapes,
+  SphericGuardian,
+  SpireGrowth,
   TheGuardian,
   TheHeart,
+  TheMushroomLair,
   TimeEater,
   Transient,
+  WrithingMass,
 }
 
 const fileInput: HTMLElement = document.getElementById("data")!;
@@ -520,6 +553,16 @@ function parseFile(file: string): StsFile {
     } else {
       console.log("unexpected floor path: ", path);
     }
+  }
+
+  let damageTaken: DamageTaken[] = [];
+  for (let i = 0; i < json.damage_taken.length; i++) {
+    damageTaken.push({
+      damage: json.damage_taken[i].damage,
+      enemies: parseBattle(json.damage_taken[i].enemies),
+      floor: json.damage_taken[i].floor,
+      turns: json.damage_taken[i].turns,
+    });
   }
 
   let potionsObtained: PotionObtained[] = [];
@@ -687,93 +730,6 @@ function parseFile(file: string): StsFile {
     bossRelicChoices.push(bossRelicChoice);
   }
 
-  let killedBy: KilledBy = KilledBy.Error;
-  let killedByString: string =
-    json.killed_by === undefined
-      ? undefined
-      : json.killed_by.toLowerCase().replace(/\s+/g, "");
-  if (killedByString === undefined) {
-    killedBy = KilledBy.None;
-  } else if (killedByString === "2orbwalkers") {
-    killedBy = KilledBy.TwoOrbWalkers;
-  } else if (killedByString === "3byrds") {
-    killedBy = KilledBy.ThreeByrds;
-  } else if (killedByString === "3cultists") {
-    killedBy = KilledBy.ThreeCultists;
-  } else if (killedByString === "3darklings") {
-    killedBy = KilledBy.ThreeDarklings;
-  } else if (killedByString === "3sentries") {
-    killedBy = KilledBy.ThreeSentries;
-  } else if (killedByString === "automaton") {
-    killedBy = KilledBy.Automaton;
-  } else if (killedByString === "awakenedone") {
-    killedBy = KilledBy.AwakenedOne;
-  } else if (killedByString === "blueslaver") {
-    killedBy = KilledBy.BlueSlaver;
-  } else if (killedByString === "bookofstabbing") {
-    killedBy = KilledBy.BookOfStabbing;
-  } else if (killedByString === "centurionandhealer") {
-    killedBy = KilledBy.CenturionAndHealer;
-  } else if (killedByString === "champ") {
-    killedBy = KilledBy.Champ;
-  } else if (killedByString === "chosen") {
-    killedBy = KilledBy.Chosen;
-  } else if (killedByString === "chosenandbyrds") {
-    killedBy = KilledBy.ChosenAndByrds;
-  } else if (killedByString === "collector") {
-    killedBy = KilledBy.Collector;
-  } else if (killedByString === "cultist") {
-    killedBy = KilledBy.Cultist;
-  } else if (killedByString === "cultistandchosen") {
-    killedBy = KilledBy.CultistAndChosen;
-  } else if (killedByString === "donuanddeca") {
-    killedBy = KilledBy.DonuAndDeca;
-  } else if (killedByString === "exordiumthugs") {
-    killedBy = KilledBy.ExordiumThugs;
-  } else if (killedByString === "exordiumwildlife") {
-    killedBy = KilledBy.ExordiumWildlife;
-  } else if (killedByString === "gianthead") {
-    killedBy = KilledBy.GiantHead;
-  } else if (killedByString === "gremlingang") {
-    killedBy = KilledBy.GremlinGang;
-  } else if (killedByString === "gremlinleader") {
-    killedBy = KilledBy.GremlinLeader;
-  } else if (killedByString === "gremlinnob") {
-    killedBy = KilledBy.GremlinNob;
-  } else if (killedByString === "hexaghost") {
-    killedBy = KilledBy.Hexaghost;
-  } else if (killedByString === "lagavulin") {
-    killedBy = KilledBy.Lagavulin;
-  } else if (killedByString === "maskedbandits") {
-    killedBy = KilledBy.MaskedBandits;
-  } else if (killedByString === "nemesis") {
-    killedBy = KilledBy.Nemesis;
-  } else if (killedByString === "reptomancer") {
-    killedBy = KilledBy.Reptomancer;
-  } else if (killedByString === "shelledparasiteandfungi") {
-    killedBy = KilledBy.ShelledParasiteAndFungi;
-  } else if (killedByString === "shieldandspear") {
-    killedBy = KilledBy.ShieldAndSpear;
-  } else if (killedByString === "slavers") {
-    killedBy = KilledBy.Slavers;
-  } else if (killedByString === "slimeboss") {
-    killedBy = KilledBy.SlimeBoss;
-  } else if (killedByString === "snakeplant") {
-    killedBy = KilledBy.SnakePlant;
-  } else if (killedByString === "sphereand2shapes") {
-    killedBy = KilledBy.SphereAndTwoShapes;
-  } else if (killedByString === "theguardian") {
-    killedBy = KilledBy.TheGuardian;
-  } else if (killedByString === "theheart") {
-    killedBy = KilledBy.TheHeart;
-  } else if (killedByString === "timeeater") {
-    killedBy = KilledBy.TimeEater;
-  } else if (killedByString === "transient") {
-    killedBy = KilledBy.Transient;
-  } else {
-    console.log("unexpected killed by: ", killedByString);
-  }
-
   return {
     character,
     goldPerFloor: json.gold_per_floor,
@@ -783,6 +739,7 @@ function parseFile(file: string): StsFile {
     neowCost: json.neow_cost,
     relics,
     floorsPotionsUsed: json.potions_floor_usage,
+    damageTaken,
     potionsObtained,
     floorPaths,
     campfireRests: json.campfire_rested,
@@ -800,9 +757,151 @@ function parseFile(file: string): StsFile {
     floorsItemPurged: json.items_purged_floors,
     isEndless: json.is_endless,
     floorsPotionsSpawned: json.potions_floor_spawned,
-    killedBy,
+    killedBy: parseBattle(json.killed_by),
     ascensionLevel: json.ascension_level,
   };
+}
+
+function parseBattle(battleString: undefined | string): Battle {
+  let battle = Battle.Error;
+  battleString =
+    battleString === undefined
+      ? undefined
+      : battleString.toLowerCase().replace(/\s+/g, "");
+  if (battleString === undefined) {
+    battle = Battle.None;
+  } else if (battleString === "2fungibeasts") {
+    battle = Battle.TwoFungiBeasts;
+  } else if (battleString === "2louse") {
+    battle = Battle.TwoLouse;
+  } else if (battleString === "2orbwalkers") {
+    battle = Battle.TwoOrbWalkers;
+  } else if (battleString === "2thieves") {
+    battle = Battle.TwoTheives;
+  } else if (battleString === "3byrds") {
+    battle = Battle.ThreeByrds;
+  } else if (battleString === "3cultists") {
+    battle = Battle.ThreeCultists;
+  } else if (battleString === "3darklings") {
+    battle = Battle.ThreeDarklings;
+  } else if (battleString === "3louse") {
+    battle = Battle.ThreeLouse;
+  } else if (battleString === "3sentries") {
+    battle = Battle.ThreeSentries;
+  } else if (battleString === "3shapes") {
+    battle = Battle.ThreeShapes;
+  } else if (battleString === "4shapes") {
+    battle = Battle.FourShapes;
+  } else if (battleString === "automaton") {
+    battle = Battle.Automaton;
+  } else if (battleString === "awakenedone") {
+    battle = Battle.AwakenedOne;
+  } else if (battleString === "blueslaver") {
+    battle = Battle.BlueSlaver;
+  } else if (battleString === "bookofstabbing") {
+    battle = Battle.BookOfStabbing;
+  } else if (battleString === "centurionandhealer") {
+    battle = Battle.CenturionAndHealer;
+  } else if (battleString === "champ") {
+    battle = Battle.Champ;
+  } else if (battleString === "chosen") {
+    battle = Battle.Chosen;
+  } else if (battleString === "chosenandbyrds") {
+    battle = Battle.ChosenAndByrds;
+  } else if (battleString === "collector") {
+    battle = Battle.Collector;
+  } else if (battleString === "colosseumnobs") {
+    battle = Battle.ColosseumNobs;
+  } else if (battleString === "colosseumslavers") {
+    battle = Battle.ColosseumSlavers;
+  } else if (battleString === "cultist") {
+    battle = Battle.Cultist;
+  } else if (battleString === "cultistandchosen") {
+    battle = Battle.CultistAndChosen;
+  } else if (battleString === "donuanddeca") {
+    battle = Battle.DonuAndDeca;
+  } else if (battleString === "exordiumthugs") {
+    battle = Battle.ExordiumThugs;
+  } else if (battleString === "exordiumwildlife") {
+    battle = Battle.ExordiumWildlife;
+  } else if (battleString === "gianthead") {
+    battle = Battle.GiantHead;
+  } else if (battleString === "gremlingang") {
+    battle = Battle.GremlinGang;
+  } else if (battleString === "gremlinleader") {
+    battle = Battle.GremlinLeader;
+  } else if (battleString === "gremlinnob") {
+    battle = Battle.GremlinNob;
+  } else if (battleString === "hexaghost") {
+    battle = Battle.Hexaghost;
+  } else if (battleString === "jawworm") {
+    battle = Battle.JawWorm;
+  } else if (battleString === "jawwormhorde") {
+    battle = Battle.JawWormHorde;
+  } else if (battleString === "lagavulin") {
+    battle = Battle.Lagavulin;
+  } else if (battleString === "lagavulinevent") {
+    battle = Battle.LagavulinEvent;
+  } else if (battleString === "largeslime") {
+    battle = Battle.LargeSlime;
+  } else if (battleString === "looter") {
+    battle = Battle.Looter;
+  } else if (battleString === "lotsofslimes") {
+    battle = Battle.LotsOfSlimes;
+  } else if (battleString === "maskedbandits") {
+    battle = Battle.MaskedBandits;
+  } else if (battleString === "maw") {
+    battle = Battle.Maw;
+  } else if (battleString === "mindbloombossbattle") {
+    battle = Battle.MindBloomBossBattle;
+  } else if (battleString === "nemesis") {
+    battle = Battle.Nemesis;
+  } else if (battleString === "orbwalker") {
+    battle = Battle.OrbWalker;
+  } else if (battleString === "redslaver") {
+    battle = Battle.RedSlaver;
+  } else if (battleString === "reptomancer") {
+    battle = Battle.Reptomancer;
+  } else if (battleString === "sentryandsphere") {
+    battle = Battle.SentryAndSphere;
+  } else if (battleString === "shellparasite") {
+    battle = Battle.ShellParasite;
+  } else if (battleString === "shelledparasiteandfungi") {
+    battle = Battle.ShelledParasiteAndFungi;
+  } else if (battleString === "shieldandspear") {
+    battle = Battle.ShieldAndSpear;
+  } else if (battleString === "slavers") {
+    battle = Battle.Slavers;
+  } else if (battleString === "slimeboss") {
+    battle = Battle.SlimeBoss;
+  } else if (battleString === "smallslimes") {
+    battle = Battle.SmallSlimes;
+  } else if (battleString === "snakeplant") {
+    battle = Battle.SnakePlant;
+  } else if (battleString === "snecko") {
+    battle = Battle.Snecko;
+  } else if (battleString === "sphereand2shapes") {
+    battle = Battle.SphereAndTwoShapes;
+  } else if (battleString === "sphericguardian") {
+    battle = Battle.SphericGuardian;
+  } else if (battleString === "spiregrowth") {
+    battle = Battle.SpireGrowth;
+  } else if (battleString === "theguardian") {
+    battle = Battle.TheGuardian;
+  } else if (battleString === "theheart") {
+    battle = Battle.TheHeart;
+  } else if (battleString === "themushroomlair") {
+    battle = Battle.TheMushroomLair;
+  } else if (battleString === "timeeater") {
+    battle = Battle.TimeEater;
+  } else if (battleString === "transient") {
+    battle = Battle.Transient;
+  } else if (battleString === "writhingmass") {
+    battle = Battle.WrithingMass;
+  } else {
+    console.log("unexpected battle: ", battleString);
+  }
+  return battle;
 }
 
 function parseRelic(relicString: string): Relic {
