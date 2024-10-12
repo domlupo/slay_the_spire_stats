@@ -17,7 +17,7 @@ type StsFile = {
   damageTaken: DamageTaken[];
   potionsObtained: PotionObtained[];
   floorPaths: FloorPath[];
-  itemsPurchased: (Card | Relic | Potion | null)[];
+  itemsPurchased: ItemPurchase[];
   campfireRests: number;
   floorsItemsPurchased: number[];
   floorsHp: number[];
@@ -44,6 +44,18 @@ type StsFile = {
   ascensionLevel: number;
 };
 
+type ItemPurchase = {
+  item?: Card | Relic | Potion;
+  selection: ItemSelection;
+};
+
+enum ItemSelection {
+  Error,
+  Card,
+  Relic,
+  Potion,
+}
+
 enum Character {
   Error,
   Ironclad,
@@ -56,10 +68,10 @@ type CardChoice = {
   picked?: Card;
   notPicked: Card[];
   floor: number;
-  selection: Selection;
+  selection: CardSelection;
 };
 
-enum Selection {
+enum CardSelection {
   Card,
   Skip,
   SingingBowl,
@@ -841,7 +853,7 @@ function parseFiles(files: FileList) {
           // skip ArrayBuffers
         }
       }
-      graph(filter(stsFiles));
+      analyzeStats(filter(stsFiles));
     })
     .catch((e) => {
       console.log(e);
@@ -930,7 +942,7 @@ function parseFile(file: string): StsFile {
     });
   }
 
-  let itemsPurchased: (Card | Relic | Potion | null)[] = [];
+  let itemsPurchased: ItemPurchase[] = [];
   for (let i = 0; i < json.items_purchased.length; i++) {
     itemsPurchased.push(parseItemPurchase(json.items_purchased[i]));
   }
@@ -1005,20 +1017,20 @@ function parseFile(file: string): StsFile {
       cardChoices.push({
         notPicked,
         floor,
-        selection: Selection.Skip,
+        selection: CardSelection.Skip,
       });
     } else if (json.card_choices[i].picked == "Singing Bowl") {
       cardChoices.push({
         notPicked,
         floor,
-        selection: Selection.SingingBowl,
+        selection: CardSelection.SingingBowl,
       });
     } else {
       cardChoices.push({
         picked: parseCardAndLogError(json.card_choices[i].picked),
         notPicked,
         floor,
-        selection: Selection.Card,
+        selection: CardSelection.Card,
       });
     }
   }
@@ -1058,7 +1070,7 @@ function parseFile(file: string): StsFile {
     damageTaken,
     potionsObtained,
     floorPaths,
-    itemsPurchased: [{ name: CardName.Error, upgraded: false }],
+    itemsPurchased,
     campfireRests: json.campfire_rested,
     floorsItemsPurchased: json.item_purchase_floors,
     floorsHp: json.current_hp_per_floor,
@@ -1080,22 +1092,33 @@ function parseFile(file: string): StsFile {
   };
 }
 
-function parseItemPurchase(itemString: string): Card | Relic | Potion | null {
+function parseItemPurchase(itemString: string): ItemPurchase {
   let itemPurchased: Card | Potion | Relic;
   itemPurchased = parseCard(itemString);
   if (itemPurchased.name !== CardName.Error) {
-    return itemPurchased;
+    return {
+      item: itemPurchased,
+      selection: ItemSelection.Card,
+    };
   }
   itemPurchased = parseRelic(itemString);
   if (itemPurchased !== Relic.Error) {
-    return itemPurchased;
+    return {
+      item: itemPurchased,
+      selection: ItemSelection.Relic,
+    };
   }
   itemPurchased = parsePotion(itemString);
   if (itemPurchased !== Potion.Error) {
-    return itemPurchased;
+    return {
+      item: itemPurchased,
+      selection: ItemSelection.Potion,
+    };
   }
   console.log("unexpected item purchase : ", itemString);
-  return null;
+  return {
+    selection: ItemSelection.Error,
+  };
 }
 
 function parsePotion(potionString: string): Potion {
@@ -2476,7 +2499,161 @@ function filter(files: StsFile[]): StsFile[] {
   return files;
 }
 
-async function graph(files: StsFile[]) {
+function analyzeStats(files: StsFile[]) {
+  graphTotals(files);
+  graph(files);
+}
+
+function graphTotals(files: StsFile[]) {
+  let ironcladDamageTaken: number = 0;
+  let silentDamageTaken: number = 0;
+  let defectDamageTaken: number = 0;
+  let watcherDamageTaken: number = 0;
+
+  let ironcladTurnsTaken: number = 0;
+  let silentTurnsTaken: number = 0;
+  let defectTurnsTaken: number = 0;
+  let watcherTurnsTaken: number = 0;
+
+  let ironcladWins: number = 0;
+  let silentWins: number = 0;
+  let defectWins: number = 0;
+  let watcherWins: number = 0;
+
+  let ironcladLosses: number = 0;
+  let silentLosses: number = 0;
+  let defectLosses: number = 0;
+  let watcherLosses: number = 0;
+
+  let ironcladCardsPicked: number = 0;
+  let silentCardsPicked: number = 0;
+  let defectCardsPicked: number = 0;
+  let watcherCardsPicked: number = 0;
+
+  let ironcladCardsSkipped: number = 0;
+  let silentCardsSkipped: number = 0;
+  let defectCardsSkipped: number = 0;
+  let watcherCardsSkipped: number = 0;
+
+  let ironcladPotionsUsed: number = 0;
+  let silentPotionsUsed: number = 0;
+  let defectPotionsUsed: number = 0;
+  let watcherPotionsUsed: number = 0;
+
+  let ironcladCardsBought: number = 0;
+  let silentCardsBought: number = 0;
+  let defectCardsBought: number = 0;
+  let watcherCardsBought: number = 0;
+
+  let ironcladRelicsBought: number = 0;
+  let silentRelicsBought: number = 0;
+  let defectRelicsBought: number = 0;
+  let watcherRelicsBought: number = 0;
+
+  let ironcladPotionsBought: number = 0;
+  let silentPotionsBought: number = 0;
+  let defectPotionsBought: number = 0;
+  let watcherPotionsBought: number = 0;
+
+  for (let i = 0; i < files.length; i++) {
+    let file = files[i];
+    let character = file.character;
+    let damageTaken = 0;
+    let turnsTaken = 0;
+    let won = file.won;
+    let cardsPicked = 0;
+    let cardsSkipped = 0;
+    let potionsUsed = file.floorsPotionsUsed.length;
+    let cardsBought = 0;
+    let relicsBought = 0;
+    let potionsBought = 0;
+
+    for (let j = 0; j < file.damageTaken.length; j++) {
+      damageTaken += file.damageTaken[j].damage;
+      turnsTaken += file.damageTaken[j].turns;
+    }
+
+    for (let j = 0; j < file.cardChoices.length; j++) {
+      let selection = file.cardChoices[j].selection;
+      if (selection === CardSelection.Card) {
+        cardsPicked += 1;
+      } else if (selection === CardSelection.Skip) {
+        cardsSkipped += 1;
+      }
+    }
+
+    for (let j = 0; j < file.itemsPurchased.length; j++) {
+      let itemPurchased = file.itemsPurchased[j];
+      if (itemPurchased.selection == ItemSelection.Card) {
+        cardsBought += 1;
+      } else if (itemPurchased.selection === ItemSelection.Relic) {
+        relicsBought += 1;
+      } else if (itemPurchased.selection === ItemSelection.Potion) {
+        potionsBought += 1;
+      }
+    }
+
+    if (character === Character.Ironclad) {
+      ironcladDamageTaken += damageTaken;
+      ironcladTurnsTaken += turnsTaken;
+      ironcladCardsPicked += cardsPicked;
+      ironcladCardsSkipped += cardsSkipped;
+      ironcladPotionsUsed += potionsUsed;
+      ironcladCardsBought += cardsBought;
+      ironcladRelicsBought += relicsBought;
+      ironcladPotionsBought += potionsBought;
+      if (won) {
+        ironcladWins += 1;
+      } else {
+        ironcladLosses += 1;
+      }
+    } else if (character === Character.Silent) {
+      silentDamageTaken += damageTaken;
+      silentTurnsTaken += turnsTaken;
+      silentCardsPicked += cardsPicked;
+      silentCardsSkipped += cardsSkipped;
+      silentPotionsUsed += potionsUsed;
+      silentCardsBought += cardsBought;
+      silentRelicsBought += relicsBought;
+      silentPotionsBought += potionsBought;
+      if (won) {
+        silentWins += 1;
+      } else {
+        silentLosses += 1;
+      }
+    } else if (character === Character.Defect) {
+      defectDamageTaken += damageTaken;
+      defectTurnsTaken += turnsTaken;
+      defectCardsPicked += cardsPicked;
+      defectCardsSkipped += cardsSkipped;
+      defectPotionsUsed += potionsUsed;
+      defectCardsBought += cardsBought;
+      defectRelicsBought += relicsBought;
+      defectPotionsBought += potionsBought;
+      if (won) {
+        defectWins += 1;
+      } else {
+        defectLosses += 1;
+      }
+    } else if (character === Character.Watcher) {
+      watcherDamageTaken += damageTaken;
+      watcherTurnsTaken += turnsTaken;
+      watcherCardsPicked += cardsPicked;
+      watcherCardsSkipped += cardsSkipped;
+      watcherPotionsUsed += potionsUsed;
+      watcherCardsBought += cardsBought;
+      watcherRelicsBought += relicsBought;
+      watcherPotionsBought += potionsBought;
+      if (won) {
+        watcherWins += 1;
+      } else {
+        watcherLosses += 1;
+      }
+    }
+  }
+}
+
+function graph(files: StsFile[]) {
   let ironcladCount = 0;
   let silentCount = 0;
   let defectCount = 0;
