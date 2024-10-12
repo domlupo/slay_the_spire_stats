@@ -17,7 +17,7 @@ type StsFile = {
   damageTaken: DamageTaken[];
   potionsObtained: PotionObtained[];
   floorPaths: FloorPath[];
-  // TODO: items_purchased
+  itemsPurchased: (Card | Relic | Potion | null)[];
   campfireRests: number;
   floorsItemsPurchased: number[];
   floorsHp: number[];
@@ -868,7 +868,7 @@ function parseFile(file: string): StsFile {
   let masterDeck: Card[] = [];
   let masterDeckStrings: string[] = json.master_deck;
   for (let i = 0; i < masterDeckStrings.length; i++) {
-    masterDeck.push(parseCard(masterDeckStrings[i]));
+    masterDeck.push(parseCardAndLogError(masterDeckStrings[i]));
   }
 
   let neowCost: NeowCost = NeowCost.Error;
@@ -892,7 +892,7 @@ function parseFile(file: string): StsFile {
   let relics: Relic[] = [];
   let relicStrings: string[] = json.relics;
   for (let i = 0; i < relicStrings.length; i++) {
-    relics.push(parseRelic(relicStrings[i]));
+    relics.push(parseRelicAndLogError(relicStrings[i]));
   }
 
   let floorPaths: FloorPath[] = [];
@@ -930,96 +930,16 @@ function parseFile(file: string): StsFile {
     });
   }
 
+  let itemsPurchased: (Card | Relic | Potion | null)[] = [];
+  for (let i = 0; i < json.items_purchased.length; i++) {
+    itemsPurchased.push(parseItemPurchase(json.items_purchased[i]));
+  }
+
   let potionsObtained: PotionObtained[] = [];
   for (let i = 0; i < json.potions_obtained.length; i++) {
-    let potion = Potion.Error;
-    let potionString: string = json.potions_obtained[i].key;
-    if (potionString === "Ambrosia") {
-      potion = Potion.Ambrosia;
-    } else if (potionString === "Ancient Potion") {
-      potion = Potion.Ancient;
-    } else if (potionString === "AttackPotion") {
-      potion = Potion.Attack;
-    } else if (potionString === "BlessingOfTheForge") {
-      potion = Potion.BlessingOfTheForge;
-    } else if (potionString === "Block Potion") {
-      potion = Potion.Block;
-    } else if (potionString === "BloodPotion") {
-      potion = Potion.Blood;
-    } else if (potionString === "BottledMiracle") {
-      potion = Potion.BottledMiracle;
-    } else if (potionString === "ColorlessPotion") {
-      potion = Potion.Colorless;
-    } else if (potionString === "CultistPotion") {
-      potion = Potion.Cultist;
-    } else if (potionString === "CunningPotion") {
-      potion = Potion.Cunning;
-    } else if (potionString === "Dexterity Potion") {
-      potion = Potion.Dexterity;
-    } else if (potionString === "DistilledChaos") {
-      potion = Potion.DistilledChaos;
-    } else if (potionString === "DuplicationPotion") {
-      potion = Potion.Duplication;
-    } else if (potionString === "ElixirPotion") {
-      potion = Potion.Elixir;
-    } else if (potionString === "Energy Potion") {
-      potion = Potion.Energy;
-    } else if (potionString === "EntropicBrew") {
-      potion = Potion.EntropicBrew;
-    } else if (potionString === "EssenceOfDarkness") {
-      potion = Potion.EssenceOfDarkness;
-    } else if (potionString === "EssenceOfSteel") {
-      potion = Potion.EssenceOfSteel;
-    } else if (potionString === "Explosive Potion") {
-      potion = Potion.Explosive;
-    } else if (potionString === "FairyPotion") {
-      potion = Potion.Fairy;
-    } else if (potionString === "FearPotion") {
-      potion = Potion.Fear;
-    } else if (potionString === "Fire Potion") {
-      potion = Potion.Fire;
-    } else if (potionString === "FocusPotion") {
-      potion = Potion.Focus;
-    } else if (potionString === "Fruit Juice") {
-      potion = Potion.FruitJuice;
-    } else if (potionString === "GamblersBrew") {
-      potion = Potion.GamblersBrew;
-    } else if (potionString === "GhostInAJar") {
-      potion = Potion.GhostInAJar;
-    } else if (potionString === "HeartOfIron") {
-      potion = Potion.HeartOfIron;
-    } else if (potionString === "LiquidBronze") {
-      potion = Potion.LiquidBronze;
-    } else if (potionString === "LiquidMemories") {
-      potion = Potion.LiquidMemories;
-    } else if (potionString === "Poison Potion") {
-      potion = Potion.Poison;
-    } else if (potionString === "PotionOfCapacity") {
-      potion = Potion.PotionOfCapacity;
-    } else if (potionString === "PowerPotion") {
-      potion = Potion.Power;
-    } else if (potionString === "Regen Potion") {
-      potion = Potion.Regen;
-    } else if (potionString === "SkillPotion") {
-      potion = Potion.Skill;
-    } else if (potionString === "SmokeBomb") {
-      potion = Potion.SmokeBomb;
-    } else if (potionString === "SneckoOil") {
-      potion = Potion.SneckoOil;
-    } else if (potionString === "SpeedPotion") {
-      potion = Potion.Speed;
-    } else if (potionString === "StancePotion") {
-      potion = Potion.Stance;
-    } else if (potionString === "SteroidPotion") {
-      potion = Potion.Steroid;
-    } else if (potionString === "Strength Potion") {
-      potion = Potion.Strength;
-    } else if (potionString === "Swift Potion") {
-      potion = Potion.Swift;
-    } else if (potionString === "Weak Potion") {
-      potion = Potion.Weak;
-    } else {
-      console.log("unexpected potion: " + potionString);
+    let potion = parsePotion(json.potions_obtained[i].key);
+    if (potion === Potion.Error) {
+      console.log("unexpected potion: " + json.potions_obtained[i].key);
     }
     potionsObtained.push({
       potion,
@@ -1077,7 +997,7 @@ function parseFile(file: string): StsFile {
   for (let i = 0; i < json.card_choices.length; i++) {
     let notPicked: Card[] = [];
     for (let j = 0; j < json.card_choices[i].not_picked.length; j++) {
-      notPicked.push(parseCard(json.card_choices[i].not_picked[j]));
+      notPicked.push(parseCardAndLogError(json.card_choices[i].not_picked[j]));
     }
 
     let floor: number = json.card_choices[i].floor;
@@ -1095,7 +1015,7 @@ function parseFile(file: string): StsFile {
       });
     } else {
       cardChoices.push({
-        picked: parseCard(json.card_choices[i].picked),
+        picked: parseCardAndLogError(json.card_choices[i].picked),
         notPicked,
         floor,
         selection: Selection.Card,
@@ -1106,7 +1026,7 @@ function parseFile(file: string): StsFile {
   let relicsObtained: RelicObtained[] = [];
   for (let i = 0; i < json.relics_obtained.length; i++) {
     relicsObtained.push({
-      relic: parseRelic(json.relics_obtained[i].key),
+      relic: parseRelicAndLogError(json.relics_obtained[i].key),
       floor: json.relics_obtained[i].floor,
     });
   }
@@ -1138,6 +1058,7 @@ function parseFile(file: string): StsFile {
     damageTaken,
     potionsObtained,
     floorPaths,
+    itemsPurchased: [{ name: CardName.Error, upgraded: false }],
     campfireRests: json.campfire_rested,
     floorsItemsPurchased: json.item_purchase_floors,
     floorsHp: json.current_hp_per_floor,
@@ -1159,6 +1080,114 @@ function parseFile(file: string): StsFile {
   };
 }
 
+function parseItemPurchase(itemString: string): Card | Relic | Potion | null {
+  let itemPurchased: Card | Potion | Relic;
+  itemPurchased = parseCard(itemString);
+  if (itemPurchased.name !== CardName.Error) {
+    return itemPurchased;
+  }
+  itemPurchased = parseRelic(itemString);
+  if (itemPurchased !== Relic.Error) {
+    return itemPurchased;
+  }
+  itemPurchased = parsePotion(itemString);
+  if (itemPurchased !== Potion.Error) {
+    return itemPurchased;
+  }
+  console.log("unexpected item purchase : ", itemString);
+  return null;
+}
+
+function parsePotion(potionString: string): Potion {
+  let potion = Potion.Error;
+  if (potionString === "Ambrosia") {
+    potion = Potion.Ambrosia;
+  } else if (potionString === "Ancient Potion") {
+    potion = Potion.Ancient;
+  } else if (potionString === "AttackPotion") {
+    potion = Potion.Attack;
+  } else if (potionString === "BlessingOfTheForge") {
+    potion = Potion.BlessingOfTheForge;
+  } else if (potionString === "Block Potion") {
+    potion = Potion.Block;
+  } else if (potionString === "BloodPotion") {
+    potion = Potion.Blood;
+  } else if (potionString === "BottledMiracle") {
+    potion = Potion.BottledMiracle;
+  } else if (potionString === "ColorlessPotion") {
+    potion = Potion.Colorless;
+  } else if (potionString === "CultistPotion") {
+    potion = Potion.Cultist;
+  } else if (potionString === "CunningPotion") {
+    potion = Potion.Cunning;
+  } else if (potionString === "Dexterity Potion") {
+    potion = Potion.Dexterity;
+  } else if (potionString === "DistilledChaos") {
+    potion = Potion.DistilledChaos;
+  } else if (potionString === "DuplicationPotion") {
+    potion = Potion.Duplication;
+  } else if (potionString === "ElixirPotion") {
+    potion = Potion.Elixir;
+  } else if (potionString === "Energy Potion") {
+    potion = Potion.Energy;
+  } else if (potionString === "EntropicBrew") {
+    potion = Potion.EntropicBrew;
+  } else if (potionString === "EssenceOfDarkness") {
+    potion = Potion.EssenceOfDarkness;
+  } else if (potionString === "EssenceOfSteel") {
+    potion = Potion.EssenceOfSteel;
+  } else if (potionString === "Explosive Potion") {
+    potion = Potion.Explosive;
+  } else if (potionString === "FairyPotion") {
+    potion = Potion.Fairy;
+  } else if (potionString === "FearPotion") {
+    potion = Potion.Fear;
+  } else if (potionString === "Fire Potion") {
+    potion = Potion.Fire;
+  } else if (potionString === "FocusPotion") {
+    potion = Potion.Focus;
+  } else if (potionString === "Fruit Juice") {
+    potion = Potion.FruitJuice;
+  } else if (potionString === "GamblersBrew") {
+    potion = Potion.GamblersBrew;
+  } else if (potionString === "GhostInAJar") {
+    potion = Potion.GhostInAJar;
+  } else if (potionString === "HeartOfIron") {
+    potion = Potion.HeartOfIron;
+  } else if (potionString === "LiquidBronze") {
+    potion = Potion.LiquidBronze;
+  } else if (potionString === "LiquidMemories") {
+    potion = Potion.LiquidMemories;
+  } else if (potionString === "Poison Potion") {
+    potion = Potion.Poison;
+  } else if (potionString === "PotionOfCapacity") {
+    potion = Potion.PotionOfCapacity;
+  } else if (potionString === "PowerPotion") {
+    potion = Potion.Power;
+  } else if (potionString === "Regen Potion") {
+    potion = Potion.Regen;
+  } else if (potionString === "SkillPotion") {
+    potion = Potion.Skill;
+  } else if (potionString === "SmokeBomb") {
+    potion = Potion.SmokeBomb;
+  } else if (potionString === "SneckoOil") {
+    potion = Potion.SneckoOil;
+  } else if (potionString === "SpeedPotion") {
+    potion = Potion.Speed;
+  } else if (potionString === "StancePotion") {
+    potion = Potion.Stance;
+  } else if (potionString === "SteroidPotion") {
+    potion = Potion.Steroid;
+  } else if (potionString === "Strength Potion") {
+    potion = Potion.Strength;
+  } else if (potionString === "Swift Potion") {
+    potion = Potion.Swift;
+  } else if (potionString === "Weak Potion") {
+    potion = Potion.Weak;
+  }
+  return potion;
+}
+
 function cardName(card: string, cardName: string): boolean {
   if (card.slice(-2) == "+1") {
     card = card.substring(0, card.length - 2);
@@ -1170,6 +1199,14 @@ function cardName(card: string, cardName: string): boolean {
     return true;
   }
   return false;
+}
+
+function parseCardAndLogError(cardString: string): Card {
+  let card = parseCard(cardString);
+  if (card.name === CardName.Error) {
+    console.log("unexpected card name: ", cardString);
+  }
+  return card;
 }
 
 function parseCard(cardString: undefined | string): Card {
@@ -1867,10 +1904,7 @@ function parseCard(cardString: undefined | string): Card {
     name = CardName.Writhe;
   } else if (cardName(cardString, "zap")) {
     name = CardName.Zap;
-  } else {
-    console.log("unexpected card name: ", cardString);
   }
-
   return {
     name,
     upgraded,
@@ -2017,6 +2051,14 @@ function parseBattle(battleString: undefined | string): Battle {
     console.log("unexpected battle: ", battleString);
   }
   return battle;
+}
+
+function parseRelicAndLogError(relicString: string): Relic {
+  let relic = parseRelic(relicString);
+  if (relic === Relic.Error) {
+    console.log("unexpected relic: ", relicString);
+  }
+  return relic;
 }
 
 function parseRelic(relicString: string): Relic {
@@ -2356,8 +2398,6 @@ function parseRelic(relicString: string): Relic {
     relic = Relic.WingedGreaves;
   } else if (relicString === "wristblade") {
     relic = Relic.WristBlade;
-  } else {
-    console.log("unexpected relic: ", relicString);
   }
   return relic;
 }
