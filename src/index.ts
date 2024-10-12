@@ -11,7 +11,7 @@ type StsFile = {
   isAscensionMode: boolean;
   // TODO: campfire_choices
   neowCost: NeowCost;
-  // TODO: master_deck
+  masterDeck: Card[];
   relics: Relic[]; // TODO: verify what is relic start is it [] or undefined
   floorsPotionsUsed: number[];
   damageTaken: DamageTaken[];
@@ -50,6 +50,336 @@ enum Character {
   Silent,
   Defect,
   Watcher,
+}
+
+type Card = {
+  name: CardName;
+  upgraded: boolean; // Searing blow can be upgraded multiple times. Fixing this edge case is low priority.
+  // Ignore multiple card version edge case e.g. WraithForm, etc
+};
+
+enum CardName {
+  Error,
+  None,
+  AThousandCuts,
+  Accuracy,
+  Acrobatics,
+  Adaptation,
+  Adrenaline,
+  AfterImage,
+  Aggregate,
+  AllForOne,
+  AllOutAttack,
+  Alpha,
+  Amplify,
+  Anger,
+  Apotheosis,
+  Armaments,
+  AscendersBane,
+  AutoShields,
+  Backflip,
+  Backstab,
+  BallLightning,
+  BandageUp,
+  Bane,
+  Barrage,
+  Barricade,
+  Bash,
+  BattleTrance,
+  BattleHymn,
+  BeamCell,
+  Beta,
+  BiasedCognition,
+  Bite,
+  BladeDance,
+  Blasphemy,
+  Blizzard,
+  BloodForBlood,
+  Bloodletting,
+  Bludgeon,
+  Blur,
+  BodySlam,
+  BootSequence,
+  BouncingFlask,
+  BowlingBash,
+  Brilliance,
+  Brutality,
+  Buffer,
+  BulletTime,
+  BurningPact,
+  Burst,
+  CalculatedGamble,
+  Caltrops,
+  Capacitor,
+  Carnage,
+  CarveReality,
+  Catalyst,
+  Chaos,
+  Chill,
+  Choke,
+  Clash,
+  ClearTheMind,
+  Cleave,
+  CloakAndDagger,
+  Clothesline,
+  Clumsy,
+  ColdSnap,
+  Collect,
+  Combust,
+  CompileDriver,
+  Concentrate,
+  Conclude,
+  ConjureBlade,
+  Consecrate,
+  ConserveBattery,
+  Consume,
+  Coolheaded,
+  CoreSurge,
+  CorpseExplosion,
+  Corruption,
+  CreativeAI,
+  Crescendo,
+  CripplingPoison,
+  CrushJoints,
+  CurseOfTheBell,
+  CutThroughFate,
+  DaggerSpray,
+  DaggerThrow,
+  DarkEmbrace,
+  DarkShackles,
+  Darkness,
+  Dash,
+  DeadlyPoison,
+  Decay,
+  DeceiveReality,
+  Defend,
+  Deflect,
+  Defragment,
+  DemonForm,
+  DeusExMachina,
+  DevaForm,
+  Devotion,
+  DieDieDie,
+  Disarm,
+  Distraction,
+  DodgeAndRoll,
+  DoomAndGloom,
+  Doppelganger,
+  DoubleEnergy,
+  DoubleTap,
+  Doubt,
+  Dropkick,
+  DualWield,
+  Dualcast,
+  EchoForm,
+  Electrodynamics,
+  EmptyBody,
+  EmptyFist,
+  EmptyMind,
+  EndlessAgony,
+  Entrench,
+  Envenom,
+  Eruption,
+  EscapePlan,
+  Establishment,
+  Evaluate,
+  Eviscerate,
+  Evolve,
+  Exhume,
+  Expertise,
+  FTL,
+  Fasting,
+  FearNoEvil,
+  Feed,
+  FeelNoPain,
+  FiendFire,
+  Finesse,
+  Finisher,
+  Fission,
+  FlameBarrier,
+  Flechettes,
+  Flex,
+  FlurryOfBlows,
+  FlyingKnee,
+  FlyingSleeves,
+  FollowUp,
+  Footwork,
+  ForceField,
+  ForeignInfluence,
+  Fusion,
+  Gash,
+  GeneticAlgorithm,
+  Ghostly,
+  GhostlyArmor,
+  Glacier,
+  GlassKnife,
+  GoForTheEyes,
+  GrandFinale,
+  Halt,
+  HandOfGreed,
+  Havoc,
+  Headbutt,
+  Heatsinks,
+  HeavyBlade,
+  HeelHook,
+  HelloWorld,
+  Hemokinesis,
+  Hologram,
+  Hyperbeam,
+  Immolate,
+  Impatience,
+  Impervious,
+  Indignation,
+  InfernalBlade,
+  InfiniteBlades,
+  Inflame,
+  Injury,
+  InnerPeace,
+  Intimidate,
+  IronWave,
+  Judgement,
+  Juggernaut,
+  JustLucky,
+  Leap,
+  LegSweep,
+  LessonLearned,
+  LikeWater,
+  LimitBreak,
+  Lockon,
+  Loop,
+  MachineLearning,
+  Madness,
+  Malaise,
+  MasterOfStrategy,
+  MasterfulStab,
+  MasterReality,
+  Meditate,
+  Melter,
+  MentalFortress,
+  Metallicize,
+  MeteorStrike,
+  MultiCast,
+  Necronomicurse,
+  Neutralize,
+  NightTerror,
+  Nirvana,
+  NoxiousFumes,
+  Offering,
+  Omega,
+  Omniscience,
+  Outmaneuver,
+  Panacea,
+  Panache,
+  PanicButton,
+  Parasite,
+  PerfectedStrike,
+  Perseverance,
+  PhantasmalKiller,
+  PiercingWail,
+  PoisonedStab,
+  PommelStrike,
+  PowerThrough,
+  Pray,
+  Predator,
+  Prepared,
+  Prostrate,
+  Protect,
+  Pummel,
+  Purity,
+  QuickSlash,
+  Ragnarok,
+  Rainbow,
+  Rampage,
+  ReachHeaven,
+  Reaper,
+  Reboot,
+  Rebound,
+  RecklessCharge,
+  Recycle,
+  Redo,
+  Reflex,
+  ReinforcedBody,
+  Reprogram,
+  RiddleWithHoles,
+  RipAndTear,
+  Rupture,
+  Sanctity,
+  SandsOfTime,
+  SashWhip,
+  Scrape,
+  Scrawl,
+  SearingBlow,
+  SecondWind,
+  SecretTechnique,
+  SecretWeapon,
+  SeeingRed,
+  Seek,
+  SelfRepair,
+  Sentinel,
+  Setup,
+  SeverSoul,
+  Shockwave,
+  ShrugItOff,
+  Skewer,
+  Skim,
+  Slice,
+  SpiritShield,
+  SpotWeakness,
+  Stack,
+  StaticDischarge,
+  Steam,
+  SteamPower,
+  Storm,
+  StormOfSteel,
+  Streamline,
+  Strike,
+  Study,
+  SuckerPunch,
+  Sunder,
+  Survivor,
+  SweepingBeam,
+  Swivel,
+  SwordBoomerang,
+  Tactician,
+  TalkToTheHand,
+  Tantrum,
+  Tempest,
+  Terror,
+  TheBomb,
+  ThinkingAhead,
+  ThirdEye,
+  ThunderStrike,
+  Thunderclap,
+  ToolsOfTheTrade,
+  Transmutation,
+  TrueGrit,
+  Turbo,
+  TwinStrike,
+  UnderhandedStrike,
+  Undo,
+  Unload,
+  Uppercut,
+  Vault,
+  Vengeance,
+  Venomology,
+  Vigilance,
+  Violence,
+  Wallop,
+  Warcry,
+  WaveOfTheHand,
+  Weave,
+  WellLaidPlans,
+  WheelKick,
+  Whirlwind,
+  WhiteNoise,
+  WildStrike,
+  WindmillStrike,
+  Wireheading,
+  Worship,
+  WraithForm,
+  Wreathofflame,
+  Writhe,
+  Zap,
 }
 
 enum NeowCost {
@@ -506,6 +836,12 @@ function parseFile(file: string): StsFile {
     console.log("unexpected character chosen: ", characterString);
   }
 
+  let masterDeck: Card[] = [];
+  let masterDeckStrings: string[] = json.master_deck;
+  for (let i = 0; i < masterDeckStrings.length; i++) {
+    masterDeck.push(parseCard(masterDeckStrings[i]));
+  }
+
   let neowCost: NeowCost = NeowCost.Error;
   let neowCostString: string = json.neow_cost;
   if (neowCostString === "") {
@@ -737,6 +1073,7 @@ function parseFile(file: string): StsFile {
     playtimeSeconds: json.playtime,
     isAscensionMode: json.is_ascension_mode,
     neowCost: json.neow_cost,
+    masterDeck,
     relics,
     floorsPotionsUsed: json.potions_floor_usage,
     damageTaken,
@@ -759,6 +1096,692 @@ function parseFile(file: string): StsFile {
     floorsPotionsSpawned: json.potions_floor_spawned,
     killedBy: parseBattle(json.killed_by),
     ascensionLevel: json.ascension_level,
+  };
+}
+
+function cardName(card: string, cardName: string): boolean {
+  if (card.slice(-2) == "+1") {
+    card = card.substring(0, card.length - 2);
+  }
+  if (card === cardName) {
+    return true;
+  }
+  if (card.includes("searingblow") && cardName.includes("searingblow")) {
+    return true;
+  }
+  return false;
+}
+
+function parseCard(cardString: undefined | string): Card {
+  let name: CardName = CardName.Error;
+  let upgraded: boolean = false;
+
+  if (cardString != undefined && cardString.includes("+")) {
+    upgraded = true;
+  }
+
+  cardString =
+    cardString === undefined
+      ? undefined
+      : cardString.toLowerCase().replace(/\s+/g, "");
+
+  if (cardString === undefined) {
+    name = CardName.None;
+  } else if (cardName(cardString, "athousandcuts")) {
+    name = CardName.AThousandCuts;
+  } else if (cardName(cardString, "accuracy")) {
+    name = CardName.Accuracy;
+  } else if (cardName(cardString, "acrobatics")) {
+    name = CardName.Acrobatics;
+  } else if (cardName(cardString, "adaptation")) {
+    name = CardName.Adaptation;
+  } else if (cardName(cardString, "adrenaline")) {
+    name = CardName.Adrenaline;
+  } else if (cardName(cardString, "afterimage")) {
+    name = CardName.AfterImage;
+  } else if (cardName(cardString, "aggregate")) {
+    name = CardName.Aggregate;
+  } else if (cardName(cardString, "allforone")) {
+    name = CardName.AllForOne;
+  } else if (cardName(cardString, "alloutattack")) {
+    name = CardName.AllOutAttack;
+  } else if (cardName(cardString, "alpha")) {
+    name = CardName.Alpha;
+  } else if (cardName(cardString, "amplify")) {
+    name = CardName.Amplify;
+  } else if (cardName(cardString, "anger")) {
+    name = CardName.Anger;
+  } else if (cardName(cardString, "apotheosis")) {
+    name = CardName.Apotheosis;
+  } else if (cardName(cardString, "armaments")) {
+    name = CardName.Armaments;
+  } else if (cardName(cardString, "ascendersbane")) {
+    name = CardName.AscendersBane;
+  } else if (cardName(cardString, "autoshields")) {
+    name = CardName.AutoShields;
+  } else if (cardName(cardString, "backflip")) {
+    name = CardName.Backflip;
+  } else if (cardName(cardString, "backstab")) {
+    name = CardName.Backstab;
+  } else if (cardName(cardString, "balllightning")) {
+    name = CardName.BallLightning;
+  } else if (cardName(cardString, "bandageup")) {
+    name = CardName.BandageUp;
+  } else if (cardName(cardString, "bane")) {
+    name = CardName.Bane;
+  } else if (cardName(cardString, "barrage")) {
+    name = CardName.Barrage;
+  } else if (cardName(cardString, "barricade")) {
+    name = CardName.Barricade;
+  } else if (cardName(cardString, "bash")) {
+    name = CardName.Bash;
+  } else if (cardName(cardString, "battletrance")) {
+    name = CardName.BattleTrance;
+  } else if (cardName(cardString, "battlehymn")) {
+    name = CardName.BattleHymn;
+  } else if (cardName(cardString, "beamcell")) {
+    name = CardName.BeamCell;
+  } else if (cardName(cardString, "beta")) {
+    name = CardName.Beta;
+  } else if (cardName(cardString, "biasedcognition")) {
+    name = CardName.BiasedCognition;
+  } else if (cardName(cardString, "bite")) {
+    name = CardName.Bite;
+  } else if (cardName(cardString, "bladedance")) {
+    name = CardName.BladeDance;
+  } else if (cardName(cardString, "blasphemy")) {
+    name = CardName.Blasphemy;
+  } else if (cardName(cardString, "blizzard")) {
+    name = CardName.Blizzard;
+  } else if (cardName(cardString, "bloodforblood")) {
+    name = CardName.BloodForBlood;
+  } else if (cardName(cardString, "bloodletting")) {
+    name = CardName.Bloodletting;
+  } else if (cardName(cardString, "bludgeon")) {
+    name = CardName.Bludgeon;
+  } else if (cardName(cardString, "blur")) {
+    name = CardName.Blur;
+  } else if (cardName(cardString, "bodyslam")) {
+    name = CardName.BodySlam;
+  } else if (cardName(cardString, "bootsequence")) {
+    name = CardName.BootSequence;
+  } else if (cardName(cardString, "bouncingflask")) {
+    name = CardName.BouncingFlask;
+  } else if (cardName(cardString, "bowlingbash")) {
+    name = CardName.BowlingBash;
+  } else if (cardName(cardString, "brilliance")) {
+    name = CardName.Brilliance;
+  } else if (cardName(cardString, "brutality")) {
+    name = CardName.Brutality;
+  } else if (cardName(cardString, "buffer")) {
+    name = CardName.Buffer;
+  } else if (cardName(cardString, "bullettime")) {
+    name = CardName.BulletTime;
+  } else if (cardName(cardString, "burningpact")) {
+    name = CardName.BurningPact;
+  } else if (cardName(cardString, "burst")) {
+    name = CardName.Burst;
+  } else if (cardName(cardString, "calculatedgamble")) {
+    name = CardName.CalculatedGamble;
+  } else if (cardName(cardString, "caltrops")) {
+    name = CardName.Caltrops;
+  } else if (cardName(cardString, "capacitor")) {
+    name = CardName.Capacitor;
+  } else if (cardName(cardString, "carnage")) {
+    name = CardName.Carnage;
+  } else if (cardName(cardString, "carvereality")) {
+    name = CardName.CarveReality;
+  } else if (cardName(cardString, "catalyst")) {
+    name = CardName.Catalyst;
+  } else if (cardName(cardString, "chaos")) {
+    name = CardName.Chaos;
+  } else if (cardName(cardString, "chill")) {
+    name = CardName.Chill;
+  } else if (cardName(cardString, "choke")) {
+    name = CardName.Choke;
+  } else if (cardName(cardString, "clash")) {
+    name = CardName.Clash;
+  } else if (cardName(cardString, "clearthemind")) {
+    name = CardName.ClearTheMind;
+  } else if (cardName(cardString, "cleave")) {
+    name = CardName.Cleave;
+  } else if (cardName(cardString, "cloakanddagger")) {
+    name = CardName.CloakAndDagger;
+  } else if (cardName(cardString, "clothesline")) {
+    name = CardName.Clothesline;
+  } else if (cardName(cardString, "clumsy")) {
+    name = CardName.Clumsy;
+  } else if (cardName(cardString, "coldsnap")) {
+    name = CardName.ColdSnap;
+  } else if (cardName(cardString, "collect")) {
+    name = CardName.Collect;
+  } else if (cardName(cardString, "combust")) {
+    name = CardName.Combust;
+  } else if (cardName(cardString, "compiledriver")) {
+    name = CardName.CompileDriver;
+  } else if (cardName(cardString, "concentrate")) {
+    name = CardName.Concentrate;
+  } else if (cardName(cardString, "conclude")) {
+    name = CardName.Conclude;
+  } else if (cardName(cardString, "conjureblade")) {
+    name = CardName.ConjureBlade;
+  } else if (cardName(cardString, "consecrate")) {
+    name = CardName.Consecrate;
+  } else if (cardName(cardString, "conservebattery")) {
+    name = CardName.ConserveBattery;
+  } else if (cardName(cardString, "consume")) {
+    name = CardName.Consume;
+  } else if (cardName(cardString, "coolheaded")) {
+    name = CardName.Coolheaded;
+  } else if (cardName(cardString, "coresurge")) {
+    name = CardName.CoreSurge;
+  } else if (cardName(cardString, "corpseexplosion")) {
+    name = CardName.CorpseExplosion;
+  } else if (cardName(cardString, "corruption")) {
+    name = CardName.Corruption;
+  } else if (cardName(cardString, "creativeai")) {
+    name = CardName.CreativeAI;
+  } else if (cardName(cardString, "crescendo")) {
+    name = CardName.Crescendo;
+  } else if (cardName(cardString, "cripplingpoison")) {
+    name = CardName.CripplingPoison;
+  } else if (cardName(cardString, "crushjoints")) {
+    name = CardName.CrushJoints;
+  } else if (cardName(cardString, "curseofthebell")) {
+    name = CardName.CurseOfTheBell;
+  } else if (cardName(cardString, "cutthroughfate")) {
+    name = CardName.CutThroughFate;
+  } else if (cardName(cardString, "daggerspray")) {
+    name = CardName.DaggerSpray;
+  } else if (cardName(cardString, "daggerthrow")) {
+    name = CardName.DaggerThrow;
+  } else if (cardName(cardString, "darkembrace")) {
+    name = CardName.DarkEmbrace;
+  } else if (cardName(cardString, "darkshackles")) {
+    name = CardName.DarkShackles;
+  } else if (cardName(cardString, "darkness")) {
+    name = CardName.Darkness;
+  } else if (cardName(cardString, "dash")) {
+    name = CardName.Dash;
+  } else if (cardName(cardString, "deadlypoison")) {
+    name = CardName.DeadlyPoison;
+  } else if (cardName(cardString, "decay")) {
+    name = CardName.Decay;
+  } else if (cardName(cardString, "deceivereality")) {
+    name = CardName.DeceiveReality;
+  } else if (
+    cardName(cardString, "defend_b") ||
+    cardName(cardString, "defend_r") ||
+    cardName(cardString, "defend_g") ||
+    cardName(cardString, "defend_p")
+  ) {
+    name = CardName.Defend;
+  } else if (cardName(cardString, "deflect")) {
+    name = CardName.Deflect;
+  } else if (cardName(cardString, "defragment")) {
+    name = CardName.Defragment;
+  } else if (cardName(cardString, "demonform")) {
+    name = CardName.DemonForm;
+  } else if (cardName(cardString, "deusexmachina")) {
+    name = CardName.DeusExMachina;
+  } else if (cardName(cardString, "devaform")) {
+    name = CardName.DevaForm;
+  } else if (cardName(cardString, "devotion")) {
+    name = CardName.Devotion;
+  } else if (cardName(cardString, "diediedie")) {
+    name = CardName.DieDieDie;
+  } else if (cardName(cardString, "disarm")) {
+    name = CardName.Disarm;
+  } else if (cardName(cardString, "distraction")) {
+    name = CardName.Distraction;
+  } else if (cardName(cardString, "dodgeandroll")) {
+    name = CardName.DodgeAndRoll;
+  } else if (cardName(cardString, "doomandgloom")) {
+    name = CardName.DoomAndGloom;
+  } else if (cardName(cardString, "doppelganger")) {
+    name = CardName.Doppelganger;
+  } else if (cardName(cardString, "doubleenergy")) {
+    name = CardName.DoubleEnergy;
+  } else if (cardName(cardString, "doubletap")) {
+    name = CardName.DoubleTap;
+  } else if (cardName(cardString, "doubt")) {
+    name = CardName.Doubt;
+  } else if (cardName(cardString, "dropkick")) {
+    name = CardName.Dropkick;
+  } else if (cardName(cardString, "dualwield")) {
+    name = CardName.DualWield;
+  } else if (cardName(cardString, "dualcast")) {
+    name = CardName.Dualcast;
+  } else if (cardName(cardString, "echoform")) {
+    name = CardName.EchoForm;
+  } else if (cardName(cardString, "electrodynamics")) {
+    name = CardName.Electrodynamics;
+  } else if (cardName(cardString, "emptybody")) {
+    name = CardName.EmptyBody;
+  } else if (cardName(cardString, "emptyfist")) {
+    name = CardName.EmptyFist;
+  } else if (cardName(cardString, "emptymind")) {
+    name = CardName.EmptyMind;
+  } else if (cardName(cardString, "endlessagony")) {
+    name = CardName.EndlessAgony;
+  } else if (cardName(cardString, "entrench")) {
+    name = CardName.Entrench;
+  } else if (cardName(cardString, "envenom")) {
+    name = CardName.Envenom;
+  } else if (cardName(cardString, "eruption")) {
+    name = CardName.Eruption;
+  } else if (cardName(cardString, "escapeplan")) {
+    name = CardName.EscapePlan;
+  } else if (cardName(cardString, "establishment")) {
+    name = CardName.Establishment;
+  } else if (cardName(cardString, "evaluate")) {
+    name = CardName.Evaluate;
+  } else if (cardName(cardString, "eviscerate")) {
+    name = CardName.Eviscerate;
+  } else if (cardName(cardString, "evolve")) {
+    name = CardName.Evolve;
+  } else if (cardName(cardString, "exhume")) {
+    name = CardName.Exhume;
+  } else if (cardName(cardString, "expertise")) {
+    name = CardName.Expertise;
+  } else if (cardName(cardString, "ftl")) {
+    name = CardName.FTL;
+  } else if (cardName(cardString, "fasting2")) {
+    name = CardName.Fasting;
+  } else if (cardName(cardString, "fearnoevil")) {
+    name = CardName.FearNoEvil;
+  } else if (cardName(cardString, "feed")) {
+    name = CardName.Feed;
+  } else if (cardName(cardString, "feelnopain")) {
+    name = CardName.FeelNoPain;
+  } else if (cardName(cardString, "fiendfire")) {
+    name = CardName.FiendFire;
+  } else if (cardName(cardString, "finesse")) {
+    name = CardName.Finesse;
+  } else if (cardName(cardString, "finisher")) {
+    name = CardName.Finisher;
+  } else if (cardName(cardString, "fission")) {
+    name = CardName.Fission;
+  } else if (cardName(cardString, "flamebarrier")) {
+    name = CardName.FlameBarrier;
+  } else if (cardName(cardString, "flechettes")) {
+    name = CardName.Flechettes;
+  } else if (cardName(cardString, "flex")) {
+    name = CardName.Flex;
+  } else if (cardName(cardString, "flurryofblows")) {
+    name = CardName.FlurryOfBlows;
+  } else if (cardName(cardString, "flyingknee")) {
+    name = CardName.FlyingKnee;
+  } else if (cardName(cardString, "flyingsleeves")) {
+    name = CardName.FlyingSleeves;
+  } else if (cardName(cardString, "followup")) {
+    name = CardName.FollowUp;
+  } else if (cardName(cardString, "footwork")) {
+    name = CardName.Footwork;
+  } else if (cardName(cardString, "forcefield")) {
+    name = CardName.ForceField;
+  } else if (cardName(cardString, "foreigninfluence")) {
+    name = CardName.ForeignInfluence;
+  } else if (cardName(cardString, "fusion")) {
+    name = CardName.Fusion;
+  } else if (cardName(cardString, "gash")) {
+    name = CardName.Gash;
+  } else if (cardName(cardString, "geneticalgorithm")) {
+    name = CardName.GeneticAlgorithm;
+  } else if (cardName(cardString, "ghostly")) {
+    name = CardName.Ghostly;
+  } else if (cardName(cardString, "ghostlyarmor")) {
+    name = CardName.GhostlyArmor;
+  } else if (cardName(cardString, "glacier")) {
+    name = CardName.Glacier;
+  } else if (cardName(cardString, "glassknife")) {
+    name = CardName.GlassKnife;
+  } else if (cardName(cardString, "gofortheeyes")) {
+    name = CardName.GoForTheEyes;
+  } else if (cardName(cardString, "grandfinale")) {
+    name = CardName.GrandFinale;
+  } else if (cardName(cardString, "halt")) {
+    name = CardName.Halt;
+  } else if (cardName(cardString, "handofgreed")) {
+    name = CardName.HandOfGreed;
+  } else if (cardName(cardString, "havoc")) {
+    name = CardName.Havoc;
+  } else if (cardName(cardString, "headbutt")) {
+    name = CardName.Headbutt;
+  } else if (cardName(cardString, "heatsinks")) {
+    name = CardName.Heatsinks;
+  } else if (cardName(cardString, "heavyblade")) {
+    name = CardName.HeavyBlade;
+  } else if (cardName(cardString, "heelhook")) {
+    name = CardName.HeelHook;
+  } else if (cardName(cardString, "helloworld")) {
+    name = CardName.HelloWorld;
+  } else if (cardName(cardString, "hemokinesis")) {
+    name = CardName.Hemokinesis;
+  } else if (cardName(cardString, "hologram")) {
+    name = CardName.Hologram;
+  } else if (cardName(cardString, "hyperbeam")) {
+    name = CardName.Hyperbeam;
+  } else if (cardName(cardString, "immolate")) {
+    name = CardName.Immolate;
+  } else if (cardName(cardString, "impatience")) {
+    name = CardName.Impatience;
+  } else if (cardName(cardString, "impervious")) {
+    name = CardName.Impervious;
+  } else if (cardName(cardString, "indignation")) {
+    name = CardName.Indignation;
+  } else if (cardName(cardString, "infernalblade")) {
+    name = CardName.InfernalBlade;
+  } else if (cardName(cardString, "infiniteblades")) {
+    name = CardName.InfiniteBlades;
+  } else if (cardName(cardString, "inflame")) {
+    name = CardName.Inflame;
+  } else if (cardName(cardString, "injury")) {
+    name = CardName.Injury;
+  } else if (cardName(cardString, "innerpeace")) {
+    name = CardName.InnerPeace;
+  } else if (cardName(cardString, "intimidate")) {
+    name = CardName.Intimidate;
+  } else if (cardName(cardString, "ironwave")) {
+    name = CardName.IronWave;
+  } else if (cardName(cardString, "judgement")) {
+    name = CardName.Judgement;
+  } else if (cardName(cardString, "juggernaut")) {
+    name = CardName.Juggernaut;
+  } else if (cardName(cardString, "justlucky")) {
+    name = CardName.JustLucky;
+  } else if (cardName(cardString, "leap")) {
+    name = CardName.Leap;
+  } else if (cardName(cardString, "legsweep")) {
+    name = CardName.LegSweep;
+  } else if (cardName(cardString, "lessonlearned")) {
+    name = CardName.LessonLearned;
+  } else if (cardName(cardString, "likewater")) {
+    name = CardName.LikeWater;
+  } else if (cardName(cardString, "limitbreak")) {
+    name = CardName.LimitBreak;
+  } else if (cardName(cardString, "lockon")) {
+    name = CardName.Lockon;
+  } else if (cardName(cardString, "loop")) {
+    name = CardName.Loop;
+  } else if (cardName(cardString, "machinelearning")) {
+    name = CardName.MachineLearning;
+  } else if (cardName(cardString, "madness")) {
+    name = CardName.Madness;
+  } else if (cardName(cardString, "malaise")) {
+    name = CardName.Malaise;
+  } else if (cardName(cardString, "masterofstrategy")) {
+    name = CardName.MasterOfStrategy;
+  } else if (cardName(cardString, "masterfulstab")) {
+    name = CardName.MasterfulStab;
+  } else if (cardName(cardString, "masterreality")) {
+    name = CardName.MasterReality;
+  } else if (cardName(cardString, "meditate")) {
+    name = CardName.Meditate;
+  } else if (cardName(cardString, "melter")) {
+    name = CardName.Melter;
+  } else if (cardName(cardString, "mentalfortress")) {
+    name = CardName.MentalFortress;
+  } else if (cardName(cardString, "metallicize")) {
+    name = CardName.Metallicize;
+  } else if (cardName(cardString, "meteorstrike")) {
+    name = CardName.MeteorStrike;
+  } else if (cardName(cardString, "multi-cast")) {
+    name = CardName.MultiCast;
+  } else if (cardName(cardString, "necronomicurse")) {
+    name = CardName.Necronomicurse;
+  } else if (cardName(cardString, "neutralize")) {
+    name = CardName.Neutralize;
+  } else if (cardName(cardString, "nightterror")) {
+    name = CardName.NightTerror;
+  } else if (cardName(cardString, "nirvana")) {
+    name = CardName.Nirvana;
+  } else if (cardName(cardString, "noxiousfumes")) {
+    name = CardName.NoxiousFumes;
+  } else if (cardName(cardString, "offering")) {
+    name = CardName.Offering;
+  } else if (cardName(cardString, "omega")) {
+    name = CardName.Omega;
+  } else if (cardName(cardString, "omniscience")) {
+    name = CardName.Omniscience;
+  } else if (cardName(cardString, "outmaneuver")) {
+    name = CardName.Outmaneuver;
+  } else if (cardName(cardString, "panacea")) {
+    name = CardName.Panacea;
+  } else if (cardName(cardString, "panache")) {
+    name = CardName.Panache;
+  } else if (cardName(cardString, "panicbutton")) {
+    name = CardName.PanicButton;
+  } else if (cardName(cardString, "parasite")) {
+    name = CardName.Parasite;
+  } else if (cardName(cardString, "perfectedstrike")) {
+    name = CardName.PerfectedStrike;
+  } else if (cardName(cardString, "perseverance")) {
+    name = CardName.Perseverance;
+  } else if (cardName(cardString, "phantasmalkiller")) {
+    name = CardName.PhantasmalKiller;
+  } else if (cardName(cardString, "piercingwail")) {
+    name = CardName.PiercingWail;
+  } else if (cardName(cardString, "poisonedstab")) {
+    name = CardName.PoisonedStab;
+  } else if (cardName(cardString, "pommelstrike")) {
+    name = CardName.PommelStrike;
+  } else if (cardName(cardString, "powerthrough")) {
+    name = CardName.PowerThrough;
+  } else if (cardName(cardString, "pray")) {
+    name = CardName.Pray;
+  } else if (cardName(cardString, "predator")) {
+    name = CardName.Predator;
+  } else if (cardName(cardString, "prepared")) {
+    name = CardName.Prepared;
+  } else if (cardName(cardString, "prostrate")) {
+    name = CardName.Prostrate;
+  } else if (cardName(cardString, "protect")) {
+    name = CardName.Protect;
+  } else if (cardName(cardString, "pummel")) {
+    name = CardName.Pummel;
+  } else if (cardName(cardString, "purity")) {
+    name = CardName.Purity;
+  } else if (cardName(cardString, "quickslash")) {
+    name = CardName.QuickSlash;
+  } else if (cardName(cardString, "ragnarok")) {
+    name = CardName.Ragnarok;
+  } else if (cardName(cardString, "rainbow")) {
+    name = CardName.Rainbow;
+  } else if (cardName(cardString, "rampage")) {
+    name = CardName.Rampage;
+  } else if (cardName(cardString, "reachheaven")) {
+    name = CardName.ReachHeaven;
+  } else if (cardName(cardString, "reaper")) {
+    name = CardName.Reaper;
+  } else if (cardName(cardString, "reboot")) {
+    name = CardName.Reboot;
+  } else if (cardName(cardString, "rebound")) {
+    name = CardName.Rebound;
+  } else if (cardName(cardString, "recklesscharge")) {
+    name = CardName.RecklessCharge;
+  } else if (cardName(cardString, "recycle")) {
+    name = CardName.Recycle;
+  } else if (cardName(cardString, "redo")) {
+    name = CardName.Redo;
+  } else if (cardName(cardString, "reflex")) {
+    name = CardName.Reflex;
+  } else if (cardName(cardString, "reinforcedbody")) {
+    name = CardName.ReinforcedBody;
+  } else if (cardName(cardString, "reprogram")) {
+    name = CardName.Reprogram;
+  } else if (cardName(cardString, "riddlewithholes")) {
+    name = CardName.RiddleWithHoles;
+  } else if (cardName(cardString, "ripandtear")) {
+    name = CardName.RipAndTear;
+  } else if (cardName(cardString, "rupture")) {
+    name = CardName.Rupture;
+  } else if (cardName(cardString, "sanctity")) {
+    name = CardName.Sanctity;
+  } else if (cardName(cardString, "sandsoftime")) {
+    name = CardName.SandsOfTime;
+  } else if (cardName(cardString, "sashwhip")) {
+    name = CardName.SashWhip;
+  } else if (cardName(cardString, "scrape")) {
+    name = CardName.Scrape;
+  } else if (cardName(cardString, "scrawl")) {
+    name = CardName.Scrawl;
+  } else if (cardName(cardString, "searingblow")) {
+    name = CardName.SearingBlow;
+  } else if (cardName(cardString, "secondwind")) {
+    name = CardName.SecondWind;
+  } else if (cardName(cardString, "secrettechnique")) {
+    name = CardName.SecretTechnique;
+  } else if (cardName(cardString, "secretweapon")) {
+    name = CardName.SecretWeapon;
+  } else if (cardName(cardString, "seeingred")) {
+    name = CardName.SeeingRed;
+  } else if (cardName(cardString, "seek")) {
+    name = CardName.Seek;
+  } else if (cardName(cardString, "selfrepair")) {
+    name = CardName.SelfRepair;
+  } else if (cardName(cardString, "sentinel")) {
+    name = CardName.Sentinel;
+  } else if (cardName(cardString, "setup")) {
+    name = CardName.Setup;
+  } else if (cardName(cardString, "seversoul")) {
+    name = CardName.SeverSoul;
+  } else if (cardName(cardString, "shockwave")) {
+    name = CardName.Shockwave;
+  } else if (cardName(cardString, "shrugitoff")) {
+    name = CardName.ShrugItOff;
+  } else if (cardName(cardString, "skewer")) {
+    name = CardName.Skewer;
+  } else if (cardName(cardString, "skim")) {
+    name = CardName.Skim;
+  } else if (cardName(cardString, "slice")) {
+    name = CardName.Slice;
+  } else if (cardName(cardString, "spiritshield")) {
+    name = CardName.SpiritShield;
+  } else if (cardName(cardString, "spotweakness")) {
+    name = CardName.SpotWeakness;
+  } else if (cardName(cardString, "stack")) {
+    name = CardName.Stack;
+  } else if (cardName(cardString, "staticdischarge")) {
+    name = CardName.StaticDischarge;
+  } else if (cardName(cardString, "steam")) {
+    name = CardName.Steam;
+  } else if (cardName(cardString, "steampower")) {
+    name = CardName.SteamPower;
+  } else if (cardName(cardString, "storm")) {
+    name = CardName.Storm;
+  } else if (cardName(cardString, "stormofsteel")) {
+    name = CardName.StormOfSteel;
+  } else if (cardName(cardString, "streamline")) {
+    name = CardName.Streamline;
+  } else if (
+    cardName(cardString, "strike_b") ||
+    cardName(cardString, "strike_r") ||
+    cardName(cardString, "strike_g") ||
+    cardName(cardString, "strike_p")
+  ) {
+    name = CardName.Strike;
+  } else if (cardName(cardString, "study")) {
+    name = CardName.Study;
+  } else if (cardName(cardString, "suckerpunch")) {
+    name = CardName.SuckerPunch;
+  } else if (cardName(cardString, "sunder")) {
+    name = CardName.Sunder;
+  } else if (cardName(cardString, "survivor")) {
+    name = CardName.Survivor;
+  } else if (cardName(cardString, "sweepingbeam")) {
+    name = CardName.SweepingBeam;
+  } else if (cardName(cardString, "swivel")) {
+    name = CardName.Swivel;
+  } else if (cardName(cardString, "swordboomerang")) {
+    name = CardName.SwordBoomerang;
+  } else if (cardName(cardString, "tactician")) {
+    name = CardName.Tactician;
+  } else if (cardName(cardString, "talktothehand")) {
+    name = CardName.TalkToTheHand;
+  } else if (cardName(cardString, "tantrum")) {
+    name = CardName.Tantrum;
+  } else if (cardName(cardString, "tempest")) {
+    name = CardName.Tempest;
+  } else if (cardName(cardString, "terror")) {
+    name = CardName.Terror;
+  } else if (cardName(cardString, "thebomb")) {
+    name = CardName.TheBomb;
+  } else if (cardName(cardString, "thinkingahead")) {
+    name = CardName.ThinkingAhead;
+  } else if (cardName(cardString, "thirdeye")) {
+    name = CardName.ThirdEye;
+  } else if (cardName(cardString, "thunderstrike")) {
+    name = CardName.ThunderStrike;
+  } else if (cardName(cardString, "thunderclap")) {
+    name = CardName.Thunderclap;
+  } else if (cardName(cardString, "toolsofthetrade")) {
+    name = CardName.ToolsOfTheTrade;
+  } else if (cardName(cardString, "transmutation")) {
+    name = CardName.Transmutation;
+  } else if (cardName(cardString, "truegrit")) {
+    name = CardName.TrueGrit;
+  } else if (cardName(cardString, "turbo")) {
+    name = CardName.Turbo;
+  } else if (cardName(cardString, "twinstrike")) {
+    name = CardName.TwinStrike;
+  } else if (cardName(cardString, "underhandedstrike")) {
+    name = CardName.UnderhandedStrike;
+  } else if (cardName(cardString, "undo")) {
+    name = CardName.Undo;
+  } else if (cardName(cardString, "unload")) {
+    name = CardName.Unload;
+  } else if (cardName(cardString, "uppercut")) {
+    name = CardName.Uppercut;
+  } else if (cardName(cardString, "vault")) {
+    name = CardName.Vault;
+  } else if (cardName(cardString, "vengeance")) {
+    name = CardName.Vengeance;
+  } else if (cardName(cardString, "venomology")) {
+    name = CardName.Venomology;
+  } else if (cardName(cardString, "vigilance")) {
+    name = CardName.Vigilance;
+  } else if (cardName(cardString, "violence")) {
+    name = CardName.Violence;
+  } else if (cardName(cardString, "wallop")) {
+    name = CardName.Wallop;
+  } else if (cardName(cardString, "warcry")) {
+    name = CardName.Warcry;
+  } else if (cardName(cardString, "waveofthehand")) {
+    name = CardName.WaveOfTheHand;
+  } else if (cardName(cardString, "weave")) {
+    name = CardName.Weave;
+  } else if (cardName(cardString, "welllaidplans")) {
+    name = CardName.WellLaidPlans;
+  } else if (cardName(cardString, "wheelkick")) {
+    name = CardName.WheelKick;
+  } else if (cardName(cardString, "whirlwind")) {
+    name = CardName.Whirlwind;
+  } else if (cardName(cardString, "whitenoise")) {
+    name = CardName.WhiteNoise;
+  } else if (cardName(cardString, "wildstrike")) {
+    name = CardName.WildStrike;
+  } else if (cardName(cardString, "windmillstrike")) {
+    name = CardName.WindmillStrike;
+  } else if (cardName(cardString, "wireheading")) {
+    name = CardName.Wireheading;
+  } else if (cardName(cardString, "worship")) {
+    name = CardName.Worship;
+  } else if (cardName(cardString, "wraithformv2")) {
+    name = CardName.WraithForm;
+  } else if (cardName(cardString, "wreathofflame")) {
+    name = CardName.Wreathofflame;
+  } else if (cardName(cardString, "writhe")) {
+    name = CardName.Writhe;
+  } else if (cardName(cardString, "zap")) {
+    name = CardName.Zap;
+  } else {
+    console.log("unexpected card name: ", cardString);
+  }
+
+  return {
+    name,
+    upgraded,
   };
 }
 
@@ -1318,7 +2341,6 @@ function parseBossRelic(bossRelicString: string): BossRelic {
 }
 
 function filter(files: StsFile[]): StsFile[] {
-  // TODO: filter daily, seeded, endless, etc
   return files;
 }
 
