@@ -2663,7 +2663,6 @@ function graphTotals(files: StsFile[]) {
   new Chart(document.getElementById("totalDamageTaken")!, {
     type: "doughnut",
     data: {
-      labels: damageTakenData.map((row) => row.damageTaken),
       datasets: [
         {
           label: "Damage",
@@ -2688,7 +2687,6 @@ function graphTotals(files: StsFile[]) {
   new Chart(document.getElementById("totalTurns")!, {
     type: "doughnut",
     data: {
-      labels: turnData.map((row) => row.turnsTaken),
       datasets: [
         {
           label: "Turns",
@@ -2713,7 +2711,6 @@ function graphTotals(files: StsFile[]) {
   new Chart(document.getElementById("totalWins")!, {
     type: "doughnut",
     data: {
-      labels: winData.map((row) => row.wins),
       datasets: [
         {
           label: "Wins",
@@ -2738,11 +2735,46 @@ function graphTotals(files: StsFile[]) {
   new Chart(document.getElementById("totalLosses")!, {
     type: "doughnut",
     data: {
-      labels: lossesData.map((row) => row.losses),
       datasets: [
         {
           label: "Losses",
           data: lossesData.map((row) => row.count),
+          backgroundColor: [
+            "rgb(255, 102, 102)",
+            "rgb(102, 255, 178)",
+            "rgb(102, 178, 255)",
+            "rgb(178, 102, 255)",
+          ],
+        },
+      ],
+    },
+  });
+
+  let winRatioData = [
+    {
+      winRatio: "Ironclad Win Ratio",
+      count: ironcladWins / (ironcladWins + ironcladLosses),
+    },
+    {
+      winRatio: "Silent Win Ratio",
+      count: silentWins / (silentWins + silentLosses),
+    },
+    {
+      winRatio: "Defect Win Ratio",
+      count: defectWins / (defectWins + defectLosses),
+    },
+    {
+      winRatio: "Watcher Win Ratio",
+      count: watcherWins / (watcherWins + watcherLosses),
+    },
+  ];
+  new Chart(document.getElementById("totalWinRatios")!, {
+    type: "doughnut",
+    data: {
+      datasets: [
+        {
+          label: "Win Ratios",
+          data: winRatioData.map((row) => row.count),
           backgroundColor: [
             "rgb(255, 102, 102)",
             "rgb(102, 255, 178)",
@@ -2763,7 +2795,6 @@ function graphTotals(files: StsFile[]) {
   new Chart(document.getElementById("totalCardPicks")!, {
     type: "doughnut",
     data: {
-      labels: cardPicksData.map((row) => row.cardPicks),
       datasets: [
         {
           label: "Card Picks",
@@ -2788,7 +2819,6 @@ function graphTotals(files: StsFile[]) {
   new Chart(document.getElementById("totalCardSkips")!, {
     type: "doughnut",
     data: {
-      labels: cardSkipsData.map((row) => row.cardSkips),
       datasets: [
         {
           label: "Card Skips",
@@ -2813,7 +2843,6 @@ function graphTotals(files: StsFile[]) {
   new Chart(document.getElementById("totalPotionsUsed")!, {
     type: "doughnut",
     data: {
-      labels: potionsUsedData.map((row) => row.potionsUsed),
       datasets: [
         {
           label: "Potions Used",
@@ -2841,7 +2870,6 @@ function graphTotals(files: StsFile[]) {
   new Chart(document.getElementById("totalCardsPurchased")!, {
     type: "doughnut",
     data: {
-      labels: cardsPurchasedData.map((row) => row.cardsPurchased),
       datasets: [
         {
           label: "Cards Purchased",
@@ -2878,7 +2906,6 @@ function graphTotals(files: StsFile[]) {
   new Chart(document.getElementById("totalRelicsPurchased")!, {
     type: "doughnut",
     data: {
-      labels: relicsPurchasedData.map((row) => row.relicsPurchased),
       datasets: [
         {
           label: "Relics Purchased",
@@ -2915,11 +2942,10 @@ function graphTotals(files: StsFile[]) {
   new Chart(document.getElementById("totalPotionsPurchased")!, {
     type: "doughnut",
     data: {
-      labels: potionsPurchasedData.map((row) => row.potionsPurchased),
       datasets: [
         {
           label: "Potions Purchased",
-          data: potionsPurchasedData.map((row) => row.potionsPurchased),
+          data: potionsPurchasedData.map((row) => row.count),
           backgroundColor: [
             "rgb(255, 102, 102)",
             "rgb(102, 255, 178)",
@@ -2959,7 +2985,6 @@ function graph(files: StsFile[]) {
   new Chart(document.getElementById("graphs")!, {
     type: "bar",
     data: {
-      labels: data.map((row) => row.played),
       datasets: [
         {
           label: "Times character played",
