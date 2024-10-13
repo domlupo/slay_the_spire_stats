@@ -2501,7 +2501,367 @@ function filter(files: StsFile[]): StsFile[] {
 
 function analyzeStats(files: StsFile[]) {
   graphTotals(files);
-  graph(files);
+  graphTopFives(files);
+}
+
+function graphTopFives(files: StsFile[]) {
+  let killedBy = new Map();
+  let killedByIronclad = new Map();
+  let killedBySilent = new Map();
+  let killedByDefect = new Map();
+  let killedByWatcher = new Map();
+  let totalDamageTaken: Map<Battle, TotalDamage> = new Map();
+  let totalDamageTakenIronclad: Map<Battle, TotalDamage> = new Map();
+  let totalDamageTakenSilent: Map<Battle, TotalDamage> = new Map();
+  let totalDamageTakenDefect: Map<Battle, TotalDamage> = new Map();
+  let totalDamageTakenWatcher: Map<Battle, TotalDamage> = new Map();
+
+  for (let i = 0; i < files.length; i++) {
+    let file = files[i];
+    let character = file.character;
+    incrementKilledBy(file.killedBy, killedBy);
+    if (character == Character.Ironclad) {
+      incrementKilledBy(file.killedBy, killedByIronclad);
+    } else if (character == Character.Silent) {
+      incrementKilledBy(file.killedBy, killedBySilent);
+    } else if (character == Character.Defect) {
+      incrementKilledBy(file.killedBy, killedByDefect);
+    } else if (character == Character.Watcher) {
+      incrementKilledBy(file.killedBy, killedByWatcher);
+    }
+
+    for (let j = 0; j < file.damageTaken.length; j++) {
+      let damageTaken = file.damageTaken[j];
+      // Hack to handle blasphemy. TODO: handle this edge case better this probably causes bugs.
+      let damage = damageTaken.damage % 100000;
+      incrementTotalDamage(damageTaken.enemies, damage, totalDamageTaken);
+      if (character == Character.Ironclad) {
+        incrementTotalDamage(
+          damageTaken.enemies,
+          damage,
+          totalDamageTakenIronclad,
+        );
+      } else if (character == Character.Silent) {
+        incrementTotalDamage(
+          damageTaken.enemies,
+          damage,
+          totalDamageTakenSilent,
+        );
+      } else if (character == Character.Defect) {
+        incrementTotalDamage(
+          damageTaken.enemies,
+          damage,
+          totalDamageTakenDefect,
+        );
+      } else if (character == Character.Watcher) {
+        incrementTotalDamage(
+          damageTaken.enemies,
+          damage,
+          totalDamageTakenWatcher,
+        );
+      }
+    }
+  }
+
+  let killedByTopFive = topFiveKilledBy(killedBy);
+  new Chart(document.getElementById("killedByTopFive")!, {
+    type: "bar",
+    data: {
+      labels: killedByTopFive.label,
+      datasets: [
+        {
+          label: "",
+          data: killedByTopFive.data,
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+    },
+  });
+
+  let averageDamageTakenTopFive = topFiveAverageDamageTaken(totalDamageTaken);
+  new Chart(document.getElementById("averageDamageTakenTopFive")!, {
+    type: "bar",
+    data: {
+      labels: averageDamageTakenTopFive.label,
+      datasets: [
+        {
+          label: "",
+          data: averageDamageTakenTopFive.data,
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+    },
+  });
+
+  let ironcladKilledByTopFive = topFiveKilledBy(killedByIronclad);
+  new Chart(document.getElementById("ironcladKilledByTopFive")!, {
+    type: "bar",
+    data: {
+      labels: ironcladKilledByTopFive.label,
+      datasets: [
+        {
+          label: "",
+          data: ironcladKilledByTopFive.data,
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+    },
+  });
+
+  let ironcladAverageDamageTakenTopFive = topFiveAverageDamageTaken(
+    totalDamageTakenIronclad,
+  );
+  new Chart(document.getElementById("ironcladAverageDamageTakenTopFive")!, {
+    type: "bar",
+    data: {
+      labels: ironcladAverageDamageTakenTopFive.label,
+      datasets: [
+        {
+          label: "",
+          data: ironcladAverageDamageTakenTopFive.data,
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+    },
+  });
+
+  let silentKilledByTopFive = topFiveKilledBy(killedBySilent);
+  new Chart(document.getElementById("silentKilledByTopFive")!, {
+    type: "bar",
+    data: {
+      labels: silentKilledByTopFive.label,
+      datasets: [
+        {
+          label: "",
+          data: silentKilledByTopFive.data,
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+    },
+  });
+
+  let silentAverageDamageTakenTopFive = topFiveAverageDamageTaken(
+    totalDamageTakenSilent,
+  );
+  new Chart(document.getElementById("silentAverageDamageTakenTopFive")!, {
+    type: "bar",
+    data: {
+      labels: silentAverageDamageTakenTopFive.label,
+      datasets: [
+        {
+          label: "",
+          data: silentAverageDamageTakenTopFive.data,
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+    },
+  });
+
+  let defectKilledByTopFive = topFiveKilledBy(killedByDefect);
+  new Chart(document.getElementById("defectKilledByTopFive")!, {
+    type: "bar",
+    data: {
+      labels: defectKilledByTopFive.label,
+      datasets: [
+        {
+          label: "",
+          data: defectKilledByTopFive.data,
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+    },
+  });
+
+  let defectAverageDamageTakenTopFive = topFiveAverageDamageTaken(
+    totalDamageTakenDefect,
+  );
+  new Chart(document.getElementById("defectAverageDamageTakenTopFive")!, {
+    type: "bar",
+    data: {
+      labels: defectAverageDamageTakenTopFive.label,
+      datasets: [
+        {
+          label: "",
+          data: defectAverageDamageTakenTopFive.data,
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+    },
+  });
+
+  let watcherKilledByTopFive = topFiveKilledBy(killedByWatcher);
+  new Chart(document.getElementById("watcherKilledByTopFive")!, {
+    type: "bar",
+    data: {
+      labels: watcherKilledByTopFive.label,
+      datasets: [
+        {
+          label: "",
+          data: watcherKilledByTopFive.data,
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+    },
+  });
+
+  let watcherAverageDamageTakenTopFive = topFiveAverageDamageTaken(
+    totalDamageTakenWatcher,
+  );
+  new Chart(document.getElementById("watcherAverageDamageTakenTopFive")!, {
+    type: "bar",
+    data: {
+      labels: watcherAverageDamageTakenTopFive.label,
+      datasets: [
+        {
+          label: "",
+          data: watcherAverageDamageTakenTopFive.data,
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+    },
+  });
+}
+
+function incrementKilledBy(battle: Battle, killedBy: Map<Battle, number>) {
+  let count = killedBy.get(battle);
+  if (count === undefined) {
+    count = 0;
+  }
+  killedBy.set(battle, count + 1);
+}
+
+type TotalDamage = {
+  damage: number;
+  count: number;
+};
+
+function incrementTotalDamage(
+  battle: Battle,
+  damage: number,
+  totalDamage: Map<Battle, TotalDamage>,
+) {
+  let td = totalDamage.get(battle);
+  if (td === undefined) {
+    td = {
+      damage: 0,
+      count: 0,
+    };
+  }
+  totalDamage.set(battle, {
+    damage: td.damage + damage,
+    count: td.count + 1,
+  });
+}
+
+type TopFive = {
+  label: string[];
+  data: number[];
+};
+
+function topFiveKilledBy(killedBy: Map<Battle, number>): TopFive {
+  let sortedKilledBy = new Map(
+    [...killedBy.entries()].sort((battle, kills) => kills[1] - battle[1]),
+  );
+  let battles: string[] = [];
+  let kills: number[] = [];
+  for (const [key, value] of sortedKilledBy) {
+    if (key !== Battle.None) {
+      battles.push(Battle[key]);
+      kills.push(value);
+    }
+  }
+  return {
+    label: battles.slice(0, 5),
+    data: kills.slice(0, 5),
+  };
+}
+
+function topFiveAverageDamageTaken(
+  totalDamageTaken: Map<Battle, TotalDamage>,
+): TopFive {
+  let averageDamageTaken = new Map();
+  for (const [key, value] of totalDamageTaken) {
+    if (key !== Battle.None) {
+      averageDamageTaken.set(key, value.damage / value.count);
+    }
+  }
+  let sortedDamageTaken = new Map(
+    [...averageDamageTaken.entries()].sort(
+      (battle, damageTaken) => damageTaken[1] - battle[1],
+    ),
+  );
+  let battles: string[] = [];
+  let damageTakenAverage: number[] = [];
+  for (const [key, value] of sortedDamageTaken) {
+    if (key !== Battle.None) {
+      battles.push(Battle[key]);
+      damageTakenAverage.push(value);
+    }
+  }
+  return {
+    label: battles.slice(0, 5),
+    data: damageTakenAverage.slice(0, 5),
+  };
 }
 
 function graphTotals(files: StsFile[]) {
@@ -2952,43 +3312,6 @@ function graphTotals(files: StsFile[]) {
             "rgb(102, 178, 255)",
             "rgb(178, 102, 255)",
           ],
-        },
-      ],
-    },
-  });
-}
-
-function graph(files: StsFile[]) {
-  let ironcladCount = 0;
-  let silentCount = 0;
-  let defectCount = 0;
-  let watcherCount = 0;
-  for (let i = 0; i < files.length; i++) {
-    let file = files[i];
-    if (file.character === Character.Ironclad) {
-      ironcladCount++;
-    } else if (file.character === Character.Silent) {
-      silentCount++;
-    } else if (file.character === Character.Defect) {
-      defectCount++;
-    } else if (file.character === Character.Watcher) {
-      watcherCount++;
-    }
-  }
-  const data = [
-    { played: "Ironclad", count: ironcladCount },
-    { played: "Silent", count: silentCount },
-    { played: "Defect", count: defectCount },
-    { played: "Watcher", count: watcherCount },
-  ];
-
-  new Chart(document.getElementById("graphs")!, {
-    type: "bar",
-    data: {
-      datasets: [
-        {
-          label: "Times character played",
-          data: data.map((row) => row.count),
         },
       ],
     },
