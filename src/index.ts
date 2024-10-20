@@ -31,7 +31,7 @@ type StsFile = {
   // TODO: build_version Not sure what this represents. It could be the last game change update e.g. card change.
   // or it could be the last time this file format changed.
   purgesPurchased: number;
-  won: boolean;
+  won: boolean; // This field is always set. Starts as false. Becomes true once finishing act 3 or finishing act 4. Does not become true if you die to heart.
   floorsMaxHp: number[];
   cardChoices: CardChoice[];
   relicsObtained: RelicObtained[];
@@ -40,7 +40,7 @@ type StsFile = {
   floorsItemPurged: number[];
   isEndless: boolean;
   floorsPotionsSpawned: number[];
-  killedBy: Battle;
+  killedBy: Battle; // This field is not set until death occurs. e.g. abandoning a run does not set it.
   ascensionLevel: number;
 };
 
