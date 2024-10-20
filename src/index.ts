@@ -2505,401 +2505,165 @@ function analyzeStats(files: StsFile[]) {
 }
 
 function graphTopFives(files: StsFile[]) {
-  let killedBy = new Map();
-  let killedByIronclad = new Map();
-  let killedBySilent = new Map();
-  let killedByDefect = new Map();
-  let killedByWatcher = new Map();
+  let killedBySum = new Map();
+  let killedBySumIronclad = new Map();
+  let killedBySumSilent = new Map();
+  let killedBySumDefect = new Map();
+  let killedBySumWatcher = new Map();
 
-  let totalKilledBy: Map<Battle, Total> = new Map();
-  let totalKilledByIronClad: Map<Battle, Total> = new Map();
-  let totalKilledBySilent: Map<Battle, Total> = new Map();
-  let totalKilledByDefect: Map<Battle, Total> = new Map();
-  let totalKilledByWatcher: Map<Battle, Total> = new Map();
+  let killedByRecord: Map<Battle, Record> = new Map();
+  let killedByRecordIronClad: Map<Battle, Record> = new Map();
+  let killedByRecordSilent: Map<Battle, Record> = new Map();
+  let killedByRecordDefect: Map<Battle, Record> = new Map();
+  let killedByRecordWatcher: Map<Battle, Record> = new Map();
 
-  let totalDamageTaken: Map<Battle, Total> = new Map();
-  let totalDamageTakenIronclad: Map<Battle, Total> = new Map();
-  let totalDamageTakenSilent: Map<Battle, Total> = new Map();
-  let totalDamageTakenDefect: Map<Battle, Total> = new Map();
-  let totalDamageTakenWatcher: Map<Battle, Total> = new Map();
+  let damageTakenRecord: Map<Battle, Record> = new Map();
+  let damageTakenRecordIronclad: Map<Battle, Record> = new Map();
+  let damageTakenRecordSilent: Map<Battle, Record> = new Map();
+  let damageTakenRecordDefect: Map<Battle, Record> = new Map();
+  let damageTakenRecordWatcher: Map<Battle, Record> = new Map();
 
   for (let i = 0; i < files.length; i++) {
     let file = files[i];
     let character = file.character;
-    incrementTotalKilledBy(file.killedBy, true, totalKilledBy);
-    incrementKilledBy(file.killedBy, killedBy);
+    incrementKilledByRecord(file.killedBy, true, killedByRecord);
+    incrementKilledBy(file.killedBy, killedBySum);
     if (character == Character.Ironclad) {
-      incrementTotalKilledBy(file.killedBy, true, totalKilledByIronClad);
-      incrementKilledBy(file.killedBy, killedByIronclad);
+      incrementKilledByRecord(file.killedBy, true, killedByRecordIronClad);
+      incrementKilledBy(file.killedBy, killedBySumIronclad);
     } else if (character == Character.Silent) {
-      incrementTotalKilledBy(file.killedBy, true, totalKilledBySilent);
-      incrementKilledBy(file.killedBy, killedBySilent);
+      incrementKilledByRecord(file.killedBy, true, killedByRecordSilent);
+      incrementKilledBy(file.killedBy, killedBySumSilent);
     } else if (character == Character.Defect) {
-      incrementTotalKilledBy(file.killedBy, true, totalKilledByDefect);
-      incrementKilledBy(file.killedBy, killedByDefect);
+      incrementKilledByRecord(file.killedBy, true, killedByRecordDefect);
+      incrementKilledBy(file.killedBy, killedBySumDefect);
     } else if (character == Character.Watcher) {
-      incrementTotalKilledBy(file.killedBy, true, totalKilledByWatcher);
-      incrementKilledBy(file.killedBy, killedByWatcher);
+      incrementKilledByRecord(file.killedBy, true, killedByRecordWatcher);
+      incrementKilledBy(file.killedBy, killedBySumWatcher);
     }
 
     for (let j = 0; j < file.damageTaken.length; j++) {
       let damageTaken = file.damageTaken[j];
       // Hack to handle blasphemy. TODO: handle this edge case better this probably causes bugs.
       let damage = damageTaken.damage % 100000;
-      incrementTotalKilledBy(damageTaken.enemies, false, totalKilledBy);
-      incrementTotalDamage(damageTaken.enemies, damage, totalDamageTaken);
+      incrementKilledByRecord(damageTaken.enemies, false, killedByRecord);
+      incrementDamageTakenRecord(
+        damageTaken.enemies,
+        damage,
+        damageTakenRecord,
+      );
       if (character == Character.Ironclad) {
-        incrementTotalKilledBy(
+        incrementKilledByRecord(
           damageTaken.enemies,
           false,
-          totalKilledByIronClad,
+          killedByRecordIronClad,
         );
-        incrementTotalDamage(
+        incrementDamageTakenRecord(
           damageTaken.enemies,
           damage,
-          totalDamageTakenIronclad,
+          damageTakenRecordIronclad,
         );
       } else if (character == Character.Silent) {
-        incrementTotalKilledBy(damageTaken.enemies, false, totalKilledBySilent);
-        incrementTotalDamage(
+        incrementKilledByRecord(
+          damageTaken.enemies,
+          false,
+          killedByRecordSilent,
+        );
+        incrementDamageTakenRecord(
           damageTaken.enemies,
           damage,
-          totalDamageTakenSilent,
+          damageTakenRecordSilent,
         );
       } else if (character == Character.Defect) {
-        incrementTotalKilledBy(damageTaken.enemies, false, totalKilledByDefect);
-        incrementTotalDamage(
+        incrementKilledByRecord(
+          damageTaken.enemies,
+          false,
+          killedByRecordDefect,
+        );
+        incrementDamageTakenRecord(
           damageTaken.enemies,
           damage,
-          totalDamageTakenDefect,
+          damageTakenRecordDefect,
         );
       } else if (character == Character.Watcher) {
-        incrementTotalKilledBy(
+        incrementKilledByRecord(
           damageTaken.enemies,
           false,
-          totalKilledByWatcher,
+          killedByRecordWatcher,
         );
-        incrementTotalKilledBy(
-          damageTaken.enemies,
-          false,
-          totalKilledByWatcher,
-        );
-        incrementTotalDamage(
+        incrementDamageTakenRecord(
           damageTaken.enemies,
           damage,
-          totalDamageTakenWatcher,
+          damageTakenRecordWatcher,
         );
       }
     }
   }
 
-  let killedByTopFive = topFiveKilledBy(killedBy);
-  new Chart(document.getElementById("killedByTopFive")!, {
-    type: "bar",
-    data: {
-      labels: killedByTopFive.label,
-      datasets: [
-        {
-          label: "",
-          data: killedByTopFive.data,
-        },
-      ],
-    },
-    options: {
-      plugins: {
-        legend: {
-          display: false,
-        },
-      },
-    },
-  });
+  let killedBySumTopFiveGraph = killedBySumTopFive(killedBySum);
+  let killedByAverageTopFive = averageTopFive(killedByRecord);
+  let averageDamageTakenTopFive = averageTopFive(damageTakenRecord);
+  graphBarChart("killedBySumTopFive", killedBySumTopFiveGraph);
+  graphBarChart("killedByAverageTopFive", killedByAverageTopFive);
+  graphBarChart("damageTakenAverageTopFive", averageDamageTakenTopFive);
 
-  let killedByAverageTopFive = topFiveAverage(totalKilledBy);
-  new Chart(document.getElementById("killedByAverageTopFive")!, {
-    type: "bar",
-    data: {
-      labels: killedByAverageTopFive.label,
-      datasets: [
-        {
-          label: "",
-          data: killedByAverageTopFive.data,
-        },
-      ],
-    },
-    options: {
-      plugins: {
-        legend: {
-          display: false,
-        },
-      },
-    },
-  });
-
-  let averageDamageTakenTopFive = topFiveAverage(totalDamageTaken);
-  new Chart(document.getElementById("averageDamageTakenTopFive")!, {
-    type: "bar",
-    data: {
-      labels: averageDamageTakenTopFive.label,
-      datasets: [
-        {
-          label: "",
-          data: averageDamageTakenTopFive.data,
-        },
-      ],
-    },
-    options: {
-      plugins: {
-        legend: {
-          display: false,
-        },
-      },
-    },
-  });
-
-  let ironcladKilledByTopFive = topFiveKilledBy(killedByIronclad);
-  new Chart(document.getElementById("ironcladKilledByTopFive")!, {
-    type: "bar",
-    data: {
-      labels: ironcladKilledByTopFive.label,
-      datasets: [
-        {
-          label: "",
-          data: ironcladKilledByTopFive.data,
-        },
-      ],
-    },
-    options: {
-      plugins: {
-        legend: {
-          display: false,
-        },
-      },
-    },
-  });
-
-  let killedByAverageTopFiveIronclad = topFiveAverage(totalKilledByIronClad);
-  new Chart(document.getElementById("killedByAverageTopFiveIronclad")!, {
-    type: "bar",
-    data: {
-      labels: killedByAverageTopFiveIronclad.label,
-      datasets: [
-        {
-          label: "",
-          data: killedByAverageTopFiveIronclad.data,
-        },
-      ],
-    },
-    options: {
-      plugins: {
-        legend: {
-          display: false,
-        },
-      },
-    },
-  });
-
-  let ironcladAverageDamageTakenTopFive = topFiveAverage(
-    totalDamageTakenIronclad,
+  let killedBySumTopFiveGraphIronclad = killedBySumTopFive(killedBySumIronclad);
+  let killedByAverageTopFiveIronclad = averageTopFive(killedByRecordIronClad);
+  let averageDamageTakenTopFiveIronclad = averageTopFive(
+    damageTakenRecordIronclad,
   );
-  new Chart(document.getElementById("ironcladAverageDamageTakenTopFive")!, {
-    type: "bar",
-    data: {
-      labels: ironcladAverageDamageTakenTopFive.label,
-      datasets: [
-        {
-          label: "",
-          data: ironcladAverageDamageTakenTopFive.data,
-        },
-      ],
-    },
-    options: {
-      plugins: {
-        legend: {
-          display: false,
-        },
-      },
-    },
-  });
-
-  let silentKilledByTopFive = topFiveKilledBy(killedBySilent);
-  new Chart(document.getElementById("silentKilledByTopFive")!, {
-    type: "bar",
-    data: {
-      labels: silentKilledByTopFive.label,
-      datasets: [
-        {
-          label: "",
-          data: silentKilledByTopFive.data,
-        },
-      ],
-    },
-    options: {
-      plugins: {
-        legend: {
-          display: false,
-        },
-      },
-    },
-  });
-
-  let killedByAverageTopFiveSilent = topFiveAverage(totalKilledBySilent);
-  new Chart(document.getElementById("killedByAverageTopFiveSilent")!, {
-    type: "bar",
-    data: {
-      labels: killedByAverageTopFiveSilent.label,
-      datasets: [
-        {
-          label: "",
-          data: killedByAverageTopFiveSilent.data,
-        },
-      ],
-    },
-    options: {
-      plugins: {
-        legend: {
-          display: false,
-        },
-      },
-    },
-  });
-
-  let silentAverageDamageTakenTopFive = topFiveAverage(totalDamageTakenSilent);
-  new Chart(document.getElementById("silentAverageDamageTakenTopFive")!, {
-    type: "bar",
-    data: {
-      labels: silentAverageDamageTakenTopFive.label,
-      datasets: [
-        {
-          label: "",
-          data: silentAverageDamageTakenTopFive.data,
-        },
-      ],
-    },
-    options: {
-      plugins: {
-        legend: {
-          display: false,
-        },
-      },
-    },
-  });
-
-  let defectKilledByTopFive = topFiveKilledBy(killedByDefect);
-  new Chart(document.getElementById("defectKilledByTopFive")!, {
-    type: "bar",
-    data: {
-      labels: defectKilledByTopFive.label,
-      datasets: [
-        {
-          label: "",
-          data: defectKilledByTopFive.data,
-        },
-      ],
-    },
-    options: {
-      plugins: {
-        legend: {
-          display: false,
-        },
-      },
-    },
-  });
-
-  let killedByAverageTopFiveDefect = topFiveAverage(totalKilledByDefect);
-  new Chart(document.getElementById("killedByAverageTopFiveDefect")!, {
-    type: "bar",
-    data: {
-      labels: killedByAverageTopFiveDefect.label,
-      datasets: [
-        {
-          label: "",
-          data: killedByAverageTopFiveDefect.data,
-        },
-      ],
-    },
-    options: {
-      plugins: {
-        legend: {
-          display: false,
-        },
-      },
-    },
-  });
-
-  let defectAverageDamageTakenTopFive = topFiveAverage(totalDamageTakenDefect);
-  new Chart(document.getElementById("defectAverageDamageTakenTopFive")!, {
-    type: "bar",
-    data: {
-      labels: defectAverageDamageTakenTopFive.label,
-      datasets: [
-        {
-          label: "",
-          data: defectAverageDamageTakenTopFive.data,
-        },
-      ],
-    },
-    options: {
-      plugins: {
-        legend: {
-          display: false,
-        },
-      },
-    },
-  });
-
-  let watcherKilledByTopFive = topFiveKilledBy(killedByWatcher);
-  new Chart(document.getElementById("watcherKilledByTopFive")!, {
-    type: "bar",
-    data: {
-      labels: watcherKilledByTopFive.label,
-      datasets: [
-        {
-          label: "",
-          data: watcherKilledByTopFive.data,
-        },
-      ],
-    },
-    options: {
-      plugins: {
-        legend: {
-          display: false,
-        },
-      },
-    },
-  });
-
-  let killedByAverageTopFiveWatcher = topFiveAverage(totalKilledByWatcher);
-  new Chart(document.getElementById("killedByAverageTopFiveWatcher")!, {
-    type: "bar",
-    data: {
-      labels: killedByAverageTopFiveWatcher.label,
-      datasets: [
-        {
-          label: "",
-          data: killedByAverageTopFiveWatcher.data,
-        },
-      ],
-    },
-    options: {
-      plugins: {
-        legend: {
-          display: false,
-        },
-      },
-    },
-  });
-
-  let watcherAverageDamageTakenTopFive = topFiveAverage(
-    totalDamageTakenWatcher,
+  graphBarChart("killedBySumTopFiveIronclad", killedBySumTopFiveGraphIronclad);
+  graphBarChart(
+    "killedByAverageTopFiveIronclad",
+    killedByAverageTopFiveIronclad,
   );
-  new Chart(document.getElementById("watcherAverageDamageTakenTopFive")!, {
+  graphBarChart(
+    "damageTakenAverageTopFiveIronclad",
+    averageDamageTakenTopFiveIronclad,
+  );
+
+  let killedBySumTopFiveGraphSilent = killedBySumTopFive(killedBySumSilent);
+  let killedByAverageTopFiveSilent = averageTopFive(killedByRecordSilent);
+  let averageDamageTakenTopFiveSilent = averageTopFive(damageTakenRecordSilent);
+  graphBarChart("killedBySumTopFiveSilent", killedBySumTopFiveGraphSilent);
+  graphBarChart("killedByAverageTopFiveSilent", killedByAverageTopFiveSilent);
+  graphBarChart(
+    "damageTakenAverageTopFiveSilent",
+    averageDamageTakenTopFiveSilent,
+  );
+
+  let killedBySumTopFiveGraphDefect = killedBySumTopFive(killedBySumDefect);
+  let killedByAverageTopFiveDefect = averageTopFive(killedByRecordDefect);
+  let averageDamageTakenTopFiveDefect = averageTopFive(damageTakenRecordDefect);
+  graphBarChart("killedBySumTopFiveDefect", killedBySumTopFiveGraphDefect);
+  graphBarChart("killedByAverageTopFiveDefect", killedByAverageTopFiveDefect);
+  graphBarChart(
+    "damageTakenAverageTopFiveDefect",
+    averageDamageTakenTopFiveDefect,
+  );
+
+  let killedBySumTopFiveGraphWatcher = killedBySumTopFive(killedBySumWatcher);
+  let killedByAverageTopFiveWatcher = averageTopFive(killedByRecordWatcher);
+  let averageDamageTakenTopFiveWatcher = averageTopFive(
+    damageTakenRecordWatcher,
+  );
+  graphBarChart("killedBySumTopFiveWatcher", killedBySumTopFiveGraphWatcher);
+  graphBarChart("killedByAverageTopFiveWatcher", killedByAverageTopFiveWatcher);
+  graphBarChart(
+    "damageTakenAverageTopFiveWatcher",
+    averageDamageTakenTopFiveWatcher,
+  );
+}
+
+function graphBarChart(elementId: string, topFive: TopFive) {
+  new Chart(document.getElementById(elementId)!, {
     type: "bar",
     data: {
-      labels: watcherAverageDamageTakenTopFive.label,
+      labels: topFive.label,
       datasets: [
         {
           label: "",
-          data: watcherAverageDamageTakenTopFive.data,
+          data: topFive.data,
         },
       ],
     },
@@ -2921,17 +2685,17 @@ function incrementKilledBy(battle: Battle, killedBy: Map<Battle, number>) {
   killedBy.set(battle, count + 1);
 }
 
-type Total = {
+type Record = {
   sum: number;
   count: number;
 };
 
-function incrementTotalKilledBy(
+function incrementKilledByRecord(
   battle: Battle,
   killedBy: boolean,
-  totalKillRatio: Map<Battle, Total>,
+  killedByAverage: Map<Battle, Record>,
 ) {
-  let tkr = totalKillRatio.get(battle);
+  let tkr = killedByAverage.get(battle);
   if (tkr === undefined) {
     tkr = {
       sum: 0,
@@ -2939,33 +2703,33 @@ function incrementTotalKilledBy(
     };
   }
   if (killedBy) {
-    totalKillRatio.set(battle, {
+    killedByAverage.set(battle, {
       sum: tkr.sum + 1,
       count: tkr.count,
     });
   } else {
-    totalKillRatio.set(battle, {
+    killedByAverage.set(battle, {
       sum: tkr.sum,
       count: tkr.count + 1,
     });
   }
 }
 
-function incrementTotalDamage(
+function incrementDamageTakenRecord(
   battle: Battle,
   damage: number,
-  totalDamage: Map<Battle, Total>,
+  damageTakenRecord: Map<Battle, Record>,
 ) {
-  let td = totalDamage.get(battle);
-  if (td === undefined) {
-    td = {
+  let dtr = damageTakenRecord.get(battle);
+  if (dtr === undefined) {
+    dtr = {
       sum: 0,
       count: 0,
     };
   }
-  totalDamage.set(battle, {
-    sum: td.sum + damage,
-    count: td.count + 1,
+  damageTakenRecord.set(battle, {
+    sum: dtr.sum + damage,
+    count: dtr.count + 1,
   });
 }
 
@@ -2974,7 +2738,7 @@ type TopFive = {
   data: number[];
 };
 
-function topFiveKilledBy(killedBy: Map<Battle, number>): TopFive {
+function killedBySumTopFive(killedBy: Map<Battle, number>): TopFive {
   let sortedKilledBy = new Map(
     [...killedBy.entries()].sort((battle, kills) => kills[1] - battle[1]),
   );
@@ -2992,7 +2756,7 @@ function topFiveKilledBy(killedBy: Map<Battle, number>): TopFive {
   };
 }
 
-function topFiveAverage(total: Map<Battle, Total>): TopFive {
+function averageTopFive(total: Map<Battle, Record>): TopFive {
   let battleAverages = new Map();
   for (const [key, value] of total) {
     if (key !== Battle.None) {
