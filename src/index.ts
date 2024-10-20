@@ -1,6 +1,7 @@
 import Chart from "chart.js/auto";
 import parseJson, { JSONError } from "parse-json";
 
+// The file structure and fields may have changed over the years. Comments assume it remained stable.
 type StsFile = {
   // TODO: name of file
   character: Character;
@@ -40,7 +41,11 @@ type StsFile = {
   floorsItemPurged: number[];
   isEndless: boolean;
   floorsPotionsSpawned: number[];
-  killedBy: Battle; // This field is not set until death occurs. e.g. abandoning a run does not set it.
+  // This field is not always set. Abandoning during a hallway fight sets it. Abandoning after winning a hallway fight and before clicking the next room will
+  // set it as you kiled by the battle you just won. Abandoning during an event does not set it.
+  // TODO: Test more edge cases
+  killedBy: Battle;
+  // always set. No ascension is 0. First ascension is 1.
   ascensionLevel: number;
 };
 
@@ -2501,6 +2506,9 @@ function filter(files: StsFile[]): StsFile[] {
 
 function analyzeStats(files: StsFile[]) {
   graphTotals(files);
+  // TODO: Fix killed by bugs. Analyzing what killed you in sts is harder than expected.
+  // For example, right now killed by is not set when abandoning before first fight.
+  // It is also not set when you abandon after you win a fight and entered a non battle room.
   graphTopFives(files);
   graphFloorDeaths(files);
 }
@@ -2517,6 +2525,7 @@ function analyzeStats(files: StsFile[]) {
 // If a user abandons at the boss treasure room should it be a boss or next act death?
 // I made arbitrary decisions to simplify floors into a few sections.
 enum FloorDeaths {
+  NeowReset, // floor reached 0
   ActOneFirstHalf, // floor reached 1-8
   ActOneSecondHalf, // floor reached 9-15
   ActOneBoss, // floor reached 16
