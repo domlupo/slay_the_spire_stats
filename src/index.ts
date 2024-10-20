@@ -903,7 +903,7 @@ function parseFile(file: string): StsFile {
   } else if (neowCostString === "TEN_PERCENT_HP_LOSS") {
     neowCost = NeowCost.TenPercentHpLoss;
   } else {
-    console.log("unexpected neow cost", neowCost);
+    console.log("unexpected neow cost: ", neowCost);
   }
 
   let relics: Relic[] = [];
@@ -2524,8 +2524,8 @@ function analyzeStats(files: StsFile[]) {
 // If a user abandons at the mid point act treasure room should it be a 1st half or second half death?
 // If a user abandons at the boss treasure room should it be a boss or next act death?
 // I made arbitrary decisions to simplify floors into a few sections.
-enum FloorDeaths {
-  NeowReset, // floor reached 0
+enum FloorDeath {
+  BeforeActOne, // floor reached 0
   ActOneFirstHalf, // floor reached 1-8
   ActOneSecondHalf, // floor reached 9-15
   ActOneBoss, // floor reached 16
@@ -2534,13 +2534,640 @@ enum FloorDeaths {
   ActTwoBoss, // floor 33
   ActThreeFirstHalf, // floor 34-42
   ActThreeSecondHalf, // floor 43-49
-  ActThreeBoss, // floor 50
+  ActThreeFirstBoss, // floor 50
   ActThreeSecondBoss, // A20 and floor 51
-  ShieldAndSpear, // A0-19 floor 51, 52, 53 or A20 floor 52, 53, 54
-  TheHeart, // A0-19 floor 54, A20 floor 55
+  ShieldAndSpear, // A0-19 floor 52-54 or A20 floor 53-55
+  TheHeart, // A0-19 floor 55, A20 floor 55
+  None, // Won by either beating act 3 or act 4
 }
 
-function graphFloorDeaths(files: StsFile[]) {}
+function graphFloorDeaths(files: StsFile[]) {
+  let floorDeathsSum = createFloorDeathsSum();
+  let floorDeathsSumIronclad = createFloorDeathsSum();
+  let floorDeathsSumSilent = createFloorDeathsSum();
+  let floorDeathsSumDefect = createFloorDeathsSum();
+  let floorDeathsSumWatcher = createFloorDeathsSum();
+
+  let floorDeathsRecord = createFloorDeathsRecord();
+  let floorDeathsRecordIronclad = createFloorDeathsRecord();
+  let floorDeathsRecordSilent = createFloorDeathsRecord();
+  let floorDeathsRecordDefect = createFloorDeathsRecord();
+  let floorDeathsRecordWatcher = createFloorDeathsRecord();
+
+  for (let i = 0; i < files.length; i++) {
+    let file = files[i];
+    let character = files[i].character;
+
+    incrementFloorDeaths(file, floorDeathsSum, floorDeathsRecord);
+    if (character === Character.Ironclad) {
+      incrementFloorDeaths(
+        file,
+        floorDeathsSumIronclad,
+        floorDeathsRecordIronclad,
+      );
+    } else if (file.character === Character.Silent) {
+      incrementFloorDeaths(file, floorDeathsSumSilent, floorDeathsRecordSilent);
+    } else if (character === Character.Defect) {
+      incrementFloorDeaths(file, floorDeathsSumDefect, floorDeathsRecordDefect);
+    } else if (character === Character.Watcher) {
+      incrementFloorDeaths(
+        file,
+        floorDeathsSumWatcher,
+        floorDeathsRecordWatcher,
+      );
+    } else if (character === Character.Error) {
+      console.log("unexpected character for graph floor deaths");
+    }
+  }
+
+  graphFloorDeathsSum("floorDeathsSum", floorDeathsSum);
+  graphFloorDeathsAverage("floorDeathsAverage", floorDeathsRecord);
+  graphFloorDeathsSum("floorDeathsSumIronclad", floorDeathsSumIronclad);
+  graphFloorDeathsAverage(
+    "floorDeathsAverageIronclad",
+    floorDeathsRecordIronclad,
+  );
+  graphFloorDeathsSum("floorDeathsSumSilent", floorDeathsSumSilent);
+  graphFloorDeathsAverage("floorDeathsAverageSilent", floorDeathsRecordSilent);
+  graphFloorDeathsSum("floorDeathsSumDefect", floorDeathsSumDefect);
+  graphFloorDeathsAverage("floorDeathsAverageDefect", floorDeathsRecordDefect);
+  graphFloorDeathsSum("floorDeathsSumWatcher", floorDeathsSumWatcher);
+  graphFloorDeathsAverage(
+    "floorDeathsAverageWatcher",
+    floorDeathsRecordWatcher,
+  );
+}
+
+function graphFloorDeathsSum(
+  graphName: string,
+  floorDeathsSum: Map<FloorDeath, number>,
+) {
+  let floorDeathsSumLabel: string[] = [];
+  let floorDeathsSumData: number[] = [];
+  for (const [key, value] of floorDeathsSum) {
+    if (key !== FloorDeath.None) {
+      floorDeathsSumLabel.push(FloorDeath[key]);
+      floorDeathsSumData.push(value);
+    }
+  }
+
+  new Chart(document.getElementById(graphName)!, {
+    type: "bar",
+    data: {
+      labels: floorDeathsSumLabel,
+      datasets: [
+        {
+          label: "",
+          data: floorDeathsSumData,
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+    },
+  });
+}
+
+function graphFloorDeathsAverage(
+  graphName: string,
+  floorDeathsRecord: Map<FloorDeath, Record>,
+) {
+  let floorDeathsAverageLabel: string[] = [];
+  let floorDeathsAverageData: number[] = [];
+  for (const [key, value] of floorDeathsRecord) {
+    if (key !== FloorDeath.None) {
+      floorDeathsAverageLabel.push(FloorDeath[key]);
+      floorDeathsAverageData.push(value.sum / value.count);
+    }
+  }
+
+  new Chart(document.getElementById(graphName)!, {
+    type: "bar",
+    data: {
+      labels: floorDeathsAverageLabel,
+      datasets: [
+        {
+          label: "",
+          data: floorDeathsAverageData,
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+    },
+  });
+}
+
+function incrementFloorDeaths(
+  file: StsFile,
+  floorDeathsSum: Map<FloorDeath, number>,
+  floorDeathsRecord: Map<FloorDeath, Record>,
+) {
+  let floorReached = file.floorReached;
+  let ascensionLevel = file.ascensionLevel;
+
+  if (file.won) {
+    incrementFloorDeathsSum(FloorDeath.None, floorDeathsSum);
+    incrementFloorDeathsRecord(FloorDeath.None, floorDeathsRecord);
+  } else if (floorReached === 0) {
+    incrementFloorDeathsSum(FloorDeath.BeforeActOne, floorDeathsSum);
+    incrementFloorDeathsRecord(FloorDeath.BeforeActOne, floorDeathsRecord);
+  } else if (floorReached >= 1 && floorReached <= 8) {
+    incrementFloorDeathsSum(FloorDeath.ActOneFirstHalf, floorDeathsSum);
+    incrementFloorDeathsRecord(FloorDeath.ActOneFirstHalf, floorDeathsRecord);
+  } else if (floorReached >= 9 && floorReached <= 15) {
+    incrementFloorDeathsSum(FloorDeath.ActOneSecondHalf, floorDeathsSum);
+    incrementFloorDeathsRecord(FloorDeath.ActOneSecondHalf, floorDeathsRecord);
+  } else if (floorReached === 16) {
+    incrementFloorDeathsSum(FloorDeath.ActOneBoss, floorDeathsSum);
+    incrementFloorDeathsRecord(FloorDeath.ActOneBoss, floorDeathsRecord);
+  } else if (floorReached >= 17 && floorReached <= 25) {
+    incrementFloorDeathsSum(FloorDeath.ActTwoFirstHalf, floorDeathsSum);
+    incrementFloorDeathsRecord(FloorDeath.ActTwoFirstHalf, floorDeathsRecord);
+  } else if (floorReached >= 26 && floorReached <= 32) {
+    incrementFloorDeathsSum(FloorDeath.ActTwoSecondHalf, floorDeathsSum);
+    incrementFloorDeathsRecord(FloorDeath.ActTwoSecondHalf, floorDeathsRecord);
+  } else if (floorReached === 33) {
+    incrementFloorDeathsSum(FloorDeath.ActTwoBoss, floorDeathsSum);
+    incrementFloorDeathsRecord(FloorDeath.ActTwoBoss, floorDeathsRecord);
+  } else if (floorReached >= 34 && floorReached <= 42) {
+    incrementFloorDeathsSum(FloorDeath.ActThreeFirstHalf, floorDeathsSum);
+    incrementFloorDeathsRecord(FloorDeath.ActThreeFirstHalf, floorDeathsRecord);
+  } else if (floorReached >= 43 && floorReached <= 49) {
+    incrementFloorDeathsSum(FloorDeath.ActThreeSecondHalf, floorDeathsSum);
+    incrementFloorDeathsRecord(
+      FloorDeath.ActThreeSecondHalf,
+      floorDeathsRecord,
+    );
+  } else if (floorReached === 50) {
+    incrementFloorDeathsSum(FloorDeath.ActThreeFirstBoss, floorDeathsSum);
+    incrementFloorDeathsRecord(FloorDeath.ActThreeFirstBoss, floorDeathsRecord);
+  } else if (floorReached === 51 && ascensionLevel === 20) {
+    incrementFloorDeathsSum(FloorDeath.ActThreeSecondBoss, floorDeathsSum);
+    incrementFloorDeathsRecord(
+      FloorDeath.ActThreeSecondBoss,
+      floorDeathsRecord,
+    );
+  } else if (
+    (floorReached >= 52 && floorReached <= 54 && ascensionLevel <= 19) ||
+    (floorReached >= 53 && floorReached <= 55 && ascensionLevel === 20)
+  ) {
+    incrementFloorDeathsSum(FloorDeath.ShieldAndSpear, floorDeathsSum);
+    incrementFloorDeathsRecord(FloorDeath.ShieldAndSpear, floorDeathsRecord);
+  } else if (
+    (floorReached === 55 && ascensionLevel <= 19) ||
+    (floorReached === 56 && ascensionLevel === 20)
+  ) {
+    incrementFloorDeathsSum(FloorDeath.TheHeart, floorDeathsSum);
+    incrementFloorDeathsRecord(FloorDeath.TheHeart, floorDeathsRecord);
+  } else {
+    // TODO: improve logging
+    console.log("unexpecteed graph floors deaths");
+  }
+}
+
+function createFloorDeathsSum(): Map<FloorDeath, number> {
+  let floorDeaths = new Map();
+  floorDeaths.set(FloorDeath.None, 0);
+  floorDeaths.set(FloorDeath.BeforeActOne, 0);
+  floorDeaths.set(FloorDeath.ActOneFirstHalf, 0);
+  floorDeaths.set(FloorDeath.ActOneSecondHalf, 0);
+  floorDeaths.set(FloorDeath.ActOneBoss, 0);
+  floorDeaths.set(FloorDeath.ActTwoFirstHalf, 0);
+  floorDeaths.set(FloorDeath.ActTwoSecondHalf, 0);
+  floorDeaths.set(FloorDeath.ActTwoBoss, 0);
+  floorDeaths.set(FloorDeath.ActThreeFirstHalf, 0);
+  floorDeaths.set(FloorDeath.ActThreeSecondHalf, 0);
+  floorDeaths.set(FloorDeath.ActThreeFirstBoss, 0);
+  floorDeaths.set(FloorDeath.ActThreeSecondBoss, 0);
+  floorDeaths.set(FloorDeath.ShieldAndSpear, 0);
+  floorDeaths.set(FloorDeath.TheHeart, 0);
+  return floorDeaths;
+}
+
+function createFloorDeathsRecord(): Map<FloorDeath, Record> {
+  let floorDeaths = new Map();
+  let startingRecord = {
+    sum: 0,
+    count: 0,
+  };
+  floorDeaths.set(FloorDeath.None, startingRecord);
+  floorDeaths.set(FloorDeath.BeforeActOne, startingRecord);
+  floorDeaths.set(FloorDeath.ActOneFirstHalf, startingRecord);
+  floorDeaths.set(FloorDeath.ActOneSecondHalf, startingRecord);
+  floorDeaths.set(FloorDeath.ActOneBoss, startingRecord);
+  floorDeaths.set(FloorDeath.ActTwoFirstHalf, startingRecord);
+  floorDeaths.set(FloorDeath.ActTwoSecondHalf, startingRecord);
+  floorDeaths.set(FloorDeath.ActTwoBoss, startingRecord);
+  floorDeaths.set(FloorDeath.ActThreeFirstHalf, startingRecord);
+  floorDeaths.set(FloorDeath.ActThreeSecondHalf, startingRecord);
+  floorDeaths.set(FloorDeath.ActThreeFirstBoss, startingRecord);
+  floorDeaths.set(FloorDeath.ActThreeSecondBoss, startingRecord);
+  floorDeaths.set(FloorDeath.ShieldAndSpear, startingRecord);
+  floorDeaths.set(FloorDeath.TheHeart, startingRecord);
+  return floorDeaths;
+}
+
+function incrementFloorDeathsSum(
+  floorDeath: FloorDeath,
+  floorDeathsSum: Map<FloorDeath, number>,
+) {
+  let count = floorDeathsSum.get(floorDeath);
+  if (count === undefined) {
+    count = 0;
+  }
+  floorDeathsSum.set(floorDeath, count + 1);
+}
+
+function incrementFloorDeathsRecord(
+  floorDeath: FloorDeath,
+  floorDeathsRecord: Map<FloorDeath, Record>,
+) {
+  if (floorDeath === FloorDeath.BeforeActOne) {
+    incrementFloorDeathRecordsSumAndCount(
+      FloorDeath.BeforeActOne,
+      floorDeathsRecord,
+    );
+  } else if (floorDeath === FloorDeath.ActOneFirstHalf) {
+    incrementFloorDeathRecordsCount(FloorDeath.BeforeActOne, floorDeathsRecord);
+    incrementFloorDeathRecordsSumAndCount(
+      FloorDeath.ActOneFirstHalf,
+      floorDeathsRecord,
+    );
+  } else if (floorDeath == FloorDeath.ActOneSecondHalf) {
+    incrementFloorDeathRecordsCount(FloorDeath.BeforeActOne, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsSumAndCount(
+      FloorDeath.ActOneSecondHalf,
+      floorDeathsRecord,
+    );
+  } else if (floorDeath == FloorDeath.ActOneBoss) {
+    incrementFloorDeathRecordsCount(FloorDeath.BeforeActOne, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsSumAndCount(
+      FloorDeath.ActOneBoss,
+      floorDeathsRecord,
+    );
+  } else if (floorDeath == FloorDeath.ActTwoFirstHalf) {
+    incrementFloorDeathRecordsCount(FloorDeath.BeforeActOne, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(FloorDeath.ActOneBoss, floorDeathsRecord);
+    incrementFloorDeathRecordsSumAndCount(
+      FloorDeath.ActTwoFirstHalf,
+      floorDeathsRecord,
+    );
+  } else if (floorDeath == FloorDeath.ActTwoSecondHalf) {
+    incrementFloorDeathRecordsCount(FloorDeath.BeforeActOne, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(FloorDeath.ActOneBoss, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActTwoFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsSumAndCount(
+      FloorDeath.ActTwoSecondHalf,
+      floorDeathsRecord,
+    );
+  } else if (floorDeath == FloorDeath.ActTwoBoss) {
+    incrementFloorDeathRecordsCount(FloorDeath.BeforeActOne, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(FloorDeath.ActOneBoss, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActTwoFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActTwoSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsSumAndCount(
+      FloorDeath.ActTwoBoss,
+      floorDeathsRecord,
+    );
+  } else if (floorDeath == FloorDeath.ActThreeFirstHalf) {
+    incrementFloorDeathRecordsCount(FloorDeath.BeforeActOne, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(FloorDeath.ActOneBoss, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActTwoFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActTwoSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(FloorDeath.ActTwoBoss, floorDeathsRecord);
+    incrementFloorDeathRecordsSumAndCount(
+      FloorDeath.ActThreeFirstHalf,
+      floorDeathsRecord,
+    );
+  } else if (floorDeath == FloorDeath.ActThreeSecondHalf) {
+    incrementFloorDeathRecordsCount(FloorDeath.BeforeActOne, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(FloorDeath.ActOneBoss, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActTwoFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActTwoSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(FloorDeath.ActTwoBoss, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActThreeFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsSumAndCount(
+      FloorDeath.ActThreeSecondHalf,
+      floorDeathsRecord,
+    );
+  } else if (floorDeath == FloorDeath.ActThreeFirstBoss) {
+    incrementFloorDeathRecordsCount(FloorDeath.BeforeActOne, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(FloorDeath.ActOneBoss, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActTwoFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActTwoSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(FloorDeath.ActTwoBoss, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActThreeFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActThreeSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsSumAndCount(
+      FloorDeath.ActThreeFirstBoss,
+      floorDeathsRecord,
+    );
+  } else if (floorDeath == FloorDeath.ActThreeSecondBoss) {
+    incrementFloorDeathRecordsCount(FloorDeath.BeforeActOne, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(FloorDeath.ActOneBoss, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActTwoFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActTwoSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(FloorDeath.ActTwoBoss, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActThreeFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActThreeSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActThreeFirstBoss,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsSumAndCount(
+      FloorDeath.ActThreeSecondBoss,
+      floorDeathsRecord,
+    );
+  } else if (floorDeath == FloorDeath.ShieldAndSpear) {
+    incrementFloorDeathRecordsCount(FloorDeath.BeforeActOne, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(FloorDeath.ActOneBoss, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActTwoFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActTwoSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(FloorDeath.ActTwoBoss, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActThreeFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActThreeSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActThreeFirstBoss,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActThreeSecondBoss,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsSumAndCount(
+      FloorDeath.ShieldAndSpear,
+      floorDeathsRecord,
+    );
+  } else if (floorDeath == FloorDeath.TheHeart) {
+    incrementFloorDeathRecordsCount(FloorDeath.BeforeActOne, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(FloorDeath.ActOneBoss, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActTwoFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActTwoSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(FloorDeath.ActTwoBoss, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActThreeFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActThreeSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActThreeFirstBoss,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActThreeSecondBoss,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ShieldAndSpear,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsSumAndCount(
+      FloorDeath.TheHeart,
+      floorDeathsRecord,
+    );
+  } else if (floorDeath === FloorDeath.None) {
+    incrementFloorDeathRecordsCount(FloorDeath.BeforeActOne, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActOneSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(FloorDeath.ActOneBoss, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActTwoFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActTwoSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(FloorDeath.ActTwoBoss, floorDeathsRecord);
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActThreeFirstHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActThreeSecondHalf,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActThreeFirstBoss,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ActThreeSecondBoss,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(
+      FloorDeath.ShieldAndSpear,
+      floorDeathsRecord,
+    );
+    incrementFloorDeathRecordsCount(FloorDeath.TheHeart, floorDeathsRecord);
+  } else {
+    console.log("unexpected incrementFloorDeathsRecord: ", floorDeath);
+  }
+}
+
+function incrementFloorDeathRecordsCount(
+  floorDeath: FloorDeath,
+  floorDeathsRecord: Map<FloorDeath, Record>,
+) {
+  let fdr = floorDeathsRecord.get(floorDeath);
+  if (fdr === undefined) {
+    fdr = {
+      sum: 0,
+      count: 0,
+    };
+  }
+
+  floorDeathsRecord.set(floorDeath, {
+    sum: fdr.sum,
+    count: fdr.count + 1,
+  });
+}
+
+function incrementFloorDeathRecordsSumAndCount(
+  floorDeath: FloorDeath,
+  floorDeathsRecord: Map<FloorDeath, Record>,
+) {
+  let fdr = floorDeathsRecord.get(floorDeath);
+  if (fdr === undefined) {
+    fdr = {
+      sum: 0,
+      count: 0,
+    };
+  }
+
+  floorDeathsRecord.set(floorDeath, {
+    sum: fdr.sum + 1,
+    count: fdr.count + 1,
+  });
+}
 
 function graphTopFives(files: StsFile[]) {
   let killedBySum = new Map();
