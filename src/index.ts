@@ -2502,7 +2502,36 @@ function filter(files: StsFile[]): StsFile[] {
 function analyzeStats(files: StsFile[]) {
   graphTotals(files);
   graphTopFives(files);
+  graphFloorDeaths(files);
 }
+
+// Separating floor deaths into act halves and bosses will simplify the user experience.
+//
+// Floors are hard to understand for STS. Floors 1-49 are always the same structure but then A20 forces two act three boseses.
+// This makes floor 50-56 structure dynamic. Act four is optional which makes floors optional.
+// There are unintuitive floors e.g. the boss treasure room is considered a floor even though it does not appear on the map.
+// A bar chart with >50 data points and multiple data points most likely 0 e.g. act mid point treasure rooms, boss treasure rooms will look weird.
+//
+// Simplifying the user experience will cause some data loss but the trade off is probably worth it. For example abandoning a run.
+// If a user abandons at the mid point act treasure room should it be a 1st half or second half death?
+// If a user abandons at the boss treasure room should it be a boss or next act death?
+// I made arbitrary decisions to simplify floors into a few sections.
+enum FloorDeaths {
+  ActOneFirstHalf, // floor reached 1-8
+  ActOneSecondHalf, // floor reached 9-15
+  ActOneBoss, // floor reached 16
+  ActTwoFirstHalf, // floor reached 17-25
+  ActTwoSecondHalf, // floor reached 26-32
+  ActTwoBoss, // floor 33
+  ActThreeFirstHalf, // floor 34-42
+  ActThreeSecondHalf, // floor 43-49
+  ActThreeBoss, // floor 50
+  ActThreeSecondBoss, // A20 and floor 51
+  ShieldAndSpear, // A0-19 floor 51, 52, 53 or A20 floor 52, 53, 54
+  TheHeart, // A0-19 floor 54, A20 floor 55
+}
+
+function graphFloorDeaths(files: StsFile[]) {}
 
 function graphTopFives(files: StsFile[]) {
   let killedBySum = new Map();
