@@ -6,9 +6,25 @@
     <link href="index.css" rel="stylesheet" />
   </head>
   <body class="bg-light">
-    <div class="container text-center display-6 3rem">
+    <div class="container text-center 3rem">
       <div class="row pt-5">
-        <div class="col-4"></div>
+        <div class="col-1"></div>
+        <div class="col-4">
+          <div class="row">
+            <div class="display-1">How to use</div>
+            <div class="pb-2">
+              Left click Slay the Spire on Steam. Click on manage, then browse
+              local files. Upload the entire "runs" folder. Data is processed on
+              your own computer. No data is sent to a server.
+            </div>
+            <div class="pt-2">
+              <a href="https://github.com/domlupo/slay_the_spire_stats/issues"
+                >Click to request features, report bugs and contribute.</a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="col-2"></div>
         <div class="col-4">
           <div class="input-group">
             <p class="display-1">
@@ -23,274 +39,276 @@
             </p>
           </div>
         </div>
-        <div class="col-4"></div>
+        <div class="col-1"></div>
       </div>
-      <div class="row pt-5">
-        <div class="col-4">
-          <div>Win Lose Ratio</div>
-        </div>
-        <div class="col-4">
-          <div>Wins</div>
-        </div>
-        <div class="col-4">
-          <div>Losses</div>
-        </div>
-      </div>
-      <div class="row pb-5">
-        <div class="col-4">
-          <canvas id="totalWinRatios"></canvas>
-        </div>
-        <div class="col-4">
-          <canvas id="totalWins"></canvas>
-        </div>
-        <div class="col-4">
-          <canvas id="totalLosses"></canvas>
-        </div>
-      </div>
-      <div class="row pt-5">
-        <div class="col-3">
-          <div>Turns</div>
-        </div>
-        <div class="col-3">
-          <div>Card Picks</div>
-        </div>
-        <div class="col-3">
-          <div>Card Skips</div>
-        </div>
-        <div class="col-3">
-          <div>Damage Taken</div>
-        </div>
-      </div>
-      <div class="row pb-5">
-        <div class="col-3">
-          <canvas id="totalTurns"></canvas>
-        </div>
-        <div class="col-3">
-          <canvas id="totalCardPicks"></canvas>
-        </div>
-        <div class="col-3">
-          <canvas id="totalCardSkips"></canvas>
-        </div>
-        <div class="col-3">
-          <canvas id="totalDamageTaken"></canvas>
-        </div>
-      </div>
-      <div class="row pt-5">
-        <div class="col-3">
-          <div>Cards Purchased</div>
-        </div>
-        <div class="col-3">
-          <div>Relics Purchased</div>
-        </div>
-        <div class="col-3">
-          <div>Potions Purchased</div>
-        </div>
-        <div class="col-3">
-          <div>Potions Used</div>
-        </div>
-      </div>
-      <div class="row pt-5">
-        <div class="col-3">
-          <canvas id="totalCardsPurchased"></canvas>
-        </div>
-        <div class="col-3">
-          <canvas id="totalRelicsPurchased"></canvas>
-        </div>
-        <div class="col-3">
-          <canvas id="totalPotionsPurchased"></canvas>
-        </div>
-        <div class="col-3">
-          <canvas id="totalPotionsUsed"></canvas>
-        </div>
-      </div>
-      <div class="row pt-5">
-        <div class="col-4">
-          <div>Killed By Average Top 5</div>
-        </div>
-        <div class="col-4">
-          <div>Killed By Total Top 5</div>
-        </div>
-        <div class="col-4">
-          <div>Damage Taken Average Top 5</div>
-        </div>
-      </div>
-      <div class="row pb-5">
-        <div class="col-4">
-          <canvas id="killedByAverageTopFive"></canvas>
-        </div>
-        <div class="col-4">
-          <canvas id="killedBySumTopFive"></canvas>
-        </div>
-        <div class="col-4">
-          <canvas id="damageTakenAverageTopFive"></canvas>
-        </div>
-      </div>
-      <div class="row pt-5">
-        <div class="col-4">
-          <div>Ironclad Killed By Average Top 5</div>
-        </div>
-        <div class="col-4">
-          <div>Ironclad Killed By Total Top 5</div>
-        </div>
-        <div class="col-4">
-          <div>Ironclad Damage Taken Average Top 5</div>
-        </div>
-      </div>
-      <div class="row pb-5">
-        <div class="col-4">
-          <canvas id="killedByAverageTopFiveIronclad"></canvas>
-        </div>
-        <div class="col-4">
-          <canvas id="killedBySumTopFiveIronclad"></canvas>
-        </div>
-        <div class="col-4">
-          <canvas id="damageTakenAverageTopFiveIronclad"></canvas>
-        </div>
-      </div>
-      <div class="row pt-5">
-        <div class="col-4">
-          <div>Silent Killed By Average Top 5</div>
-        </div>
-        <div class="col-4">
-          <div>Silent Killed By Total Top 5</div>
-        </div>
-        <div class="col-4">
-          <div>Silent Damage Taken Average Top 5</div>
-        </div>
-      </div>
-      <div class="row pb-5">
-        <div class="col-4">
-          <canvas id="killedByAverageTopFiveSilent"></canvas>
-        </div>
-        <div class="col-4">
-          <canvas id="killedBySumTopFiveSilent"></canvas>
-        </div>
-        <div class="col-4">
-          <canvas id="damageTakenAverageTopFiveSilent"></canvas>
-        </div>
-      </div>
-      <div class="row pt-5">
-        <div class="col-4">
-          <div>Defect Killed By Avearge Top 5</div>
-        </div>
-        <div class="col-4">
-          <div>Defect Killed By Total Top 5</div>
-        </div>
-        <div class="col-4">
-          <div>Defect Damage Taken Average Top 5</div>
-        </div>
-      </div>
-      <div class="row pb-5">
-        <div class="col-4">
-          <canvas id="killedByAverageTopFiveDefect"></canvas>
-        </div>
-        <div class="col-4">
-          <canvas id="killedBySumTopFiveDefect"></canvas>
-        </div>
-        <div class="col-4">
-          <canvas id="damageTakenAverageTopFiveDefect"></canvas>
-        </div>
-      </div>
-      <div class="row pt-5">
-        <div class="col-4">
-          <div>Watcher Killed By Average 5</div>
-        </div>
-        <div class="col-4">
-          <div>Watcher Killed By Total Top 5</div>
-        </div>
-        <div class="col-4">
-          <div>Watcher Damage Taken Average Top 5</div>
-        </div>
-      </div>
-      <div class="row pb-5">
-        <div class="col-4">
-          <canvas id="killedByAverageTopFiveWatcher"></canvas>
-        </div>
-        <div class="col-4">
-          <canvas id="killedBySumTopFiveWatcher"></canvas>
-        </div>
-        <div class="col-4">
-          <canvas id="damageTakenAverageTopFiveWatcher"></canvas>
-        </div>
-      </div>
-      <div class="row pt-5">
-        <div class="col-6">
-          <div>Floor Deaths Average</div>
-        </div>
-        <div class="col-6">
-          <div>Floor Deaths Total</div>
-        </div>
-      </div>
-      <div class="row pb-5">
-        <div class="col-6">
-          <canvas id="floorDeathsAverage"></canvas>
-        </div>
-        <div class="col-6">
-          <canvas id="floorDeathsSum"></canvas>
-        </div>
-      </div>
-      <div class="row pt-5">
-        <div class="col-6">
-          <div>Ironclad Floor Deaths Average</div>
-        </div>
-        <div class="col-6">
-          <div>Ironclad Floor Deaths Total</div>
-        </div>
-      </div>
-      <div class="row pb-5">
-        <div class="col-6">
-          <canvas id="floorDeathsAverageIronclad"></canvas>
-        </div>
-        <div class="col-6">
-          <canvas id="floorDeathsSumIronclad"></canvas>
-        </div>
-      </div>
-      <div class="row pt-5">
-        <div class="col-6">
-          <div>Silent Floor Deaths Average</div>
-        </div>
-        <div class="col-6">
-          <div>Silent Floor Deaths Total</div>
-        </div>
-      </div>
-      <div class="row pb-5">
-        <div class="col-6">
-          <canvas id="floorDeathsAverageSilent"></canvas>
-        </div>
-        <div class="col-6">
-          <canvas id="floorDeathsSumSilent"></canvas>
-        </div>
-      </div>
-      <div class="row pt-5">
-        <div class="col-6">
-          <div>Defect Floor Deaths Average</div>
-        </div>
-        <div class="col-6">
-          <div>Defect Floor Deaths Total</div>
-        </div>
-      </div>
-      <div class="row pb-5">
-        <div class="col-6">
-          <canvas id="floorDeathsAverageDefect"></canvas>
-        </div>
-        <div class="col-6">
-          <canvas id="floorDeathsSumDefect"></canvas>
-        </div>
-      </div>
-      <div class="row pt-5">
-        <div class="col-6">
-          <div>Watcher Floor Deaths Average</div>
-        </div>
-        <div class="col-6">
-          <div>Watcher Floor Deaths Total</div>
-        </div>
-      </div>
-      <div class="row pb-5">
-        <div class="col-6">
-          <canvas id="floorDeathsAverageWatcher"></canvas>
-        </div>
-        <div class="col-6">
-          <canvas id="floorDeathsSumWatcher"></canvas>
+      <div class="display-6">
+        <div class="row pt-5">
+          <div class="col-4">
+            <div>Win Lose Ratio</div>
+          </div>
+          <div class="col-4">
+            <div>Wins</div>
+          </div>
+          <div class="col-4">
+            <div>Losses</div>
+          </div>
+        </div>
+        <div class="row pb-5">
+          <div class="col-4">
+            <canvas id="totalWinRatios"></canvas>
+          </div>
+          <div class="col-4">
+            <canvas id="totalWins"></canvas>
+          </div>
+          <div class="col-4">
+            <canvas id="totalLosses"></canvas>
+          </div>
+        </div>
+        <div class="row pt-5">
+          <div class="col-3">
+            <div>Turns</div>
+          </div>
+          <div class="col-3">
+            <div>Card Picks</div>
+          </div>
+          <div class="col-3">
+            <div>Card Skips</div>
+          </div>
+          <div class="col-3">
+            <div>Damage Taken</div>
+          </div>
+        </div>
+        <div class="row pb-5">
+          <div class="col-3">
+            <canvas id="totalTurns"></canvas>
+          </div>
+          <div class="col-3">
+            <canvas id="totalCardPicks"></canvas>
+          </div>
+          <div class="col-3">
+            <canvas id="totalCardSkips"></canvas>
+          </div>
+          <div class="col-3">
+            <canvas id="totalDamageTaken"></canvas>
+          </div>
+        </div>
+        <div class="row pt-5">
+          <div class="col-3">
+            <div>Cards Purchased</div>
+          </div>
+          <div class="col-3">
+            <div>Relics Purchased</div>
+          </div>
+          <div class="col-3">
+            <div>Potions Purchased</div>
+          </div>
+          <div class="col-3">
+            <div>Potions Used</div>
+          </div>
+        </div>
+        <div class="row pt-5">
+          <div class="col-3">
+            <canvas id="totalCardsPurchased"></canvas>
+          </div>
+          <div class="col-3">
+            <canvas id="totalRelicsPurchased"></canvas>
+          </div>
+          <div class="col-3">
+            <canvas id="totalPotionsPurchased"></canvas>
+          </div>
+          <div class="col-3">
+            <canvas id="totalPotionsUsed"></canvas>
+          </div>
+        </div>
+        <div class="row pt-5">
+          <div class="col-4">
+            <div>Killed By Average Top 5</div>
+          </div>
+          <div class="col-4">
+            <div>Killed By Total Top 5</div>
+          </div>
+          <div class="col-4">
+            <div>Damage Taken Average Top 5</div>
+          </div>
+        </div>
+        <div class="row pb-5">
+          <div class="col-4">
+            <canvas id="killedByAverageTopFive"></canvas>
+          </div>
+          <div class="col-4">
+            <canvas id="killedBySumTopFive"></canvas>
+          </div>
+          <div class="col-4">
+            <canvas id="damageTakenAverageTopFive"></canvas>
+          </div>
+        </div>
+        <div class="row pt-5">
+          <div class="col-4">
+            <div>Ironclad Killed By Average Top 5</div>
+          </div>
+          <div class="col-4">
+            <div>Ironclad Killed By Total Top 5</div>
+          </div>
+          <div class="col-4">
+            <div>Ironclad Damage Taken Average Top 5</div>
+          </div>
+        </div>
+        <div class="row pb-5">
+          <div class="col-4">
+            <canvas id="killedByAverageTopFiveIronclad"></canvas>
+          </div>
+          <div class="col-4">
+            <canvas id="killedBySumTopFiveIronclad"></canvas>
+          </div>
+          <div class="col-4">
+            <canvas id="damageTakenAverageTopFiveIronclad"></canvas>
+          </div>
+        </div>
+        <div class="row pt-5">
+          <div class="col-4">
+            <div>Silent Killed By Average Top 5</div>
+          </div>
+          <div class="col-4">
+            <div>Silent Killed By Total Top 5</div>
+          </div>
+          <div class="col-4">
+            <div>Silent Damage Taken Average Top 5</div>
+          </div>
+        </div>
+        <div class="row pb-5">
+          <div class="col-4">
+            <canvas id="killedByAverageTopFiveSilent"></canvas>
+          </div>
+          <div class="col-4">
+            <canvas id="killedBySumTopFiveSilent"></canvas>
+          </div>
+          <div class="col-4">
+            <canvas id="damageTakenAverageTopFiveSilent"></canvas>
+          </div>
+        </div>
+        <div class="row pt-5">
+          <div class="col-4">
+            <div>Defect Killed By Avearge Top 5</div>
+          </div>
+          <div class="col-4">
+            <div>Defect Killed By Total Top 5</div>
+          </div>
+          <div class="col-4">
+            <div>Defect Damage Taken Average Top 5</div>
+          </div>
+        </div>
+        <div class="row pb-5">
+          <div class="col-4">
+            <canvas id="killedByAverageTopFiveDefect"></canvas>
+          </div>
+          <div class="col-4">
+            <canvas id="killedBySumTopFiveDefect"></canvas>
+          </div>
+          <div class="col-4">
+            <canvas id="damageTakenAverageTopFiveDefect"></canvas>
+          </div>
+        </div>
+        <div class="row pt-5">
+          <div class="col-4">
+            <div>Watcher Killed By Average 5</div>
+          </div>
+          <div class="col-4">
+            <div>Watcher Killed By Total Top 5</div>
+          </div>
+          <div class="col-4">
+            <div>Watcher Damage Taken Average Top 5</div>
+          </div>
+        </div>
+        <div class="row pb-5">
+          <div class="col-4">
+            <canvas id="killedByAverageTopFiveWatcher"></canvas>
+          </div>
+          <div class="col-4">
+            <canvas id="killedBySumTopFiveWatcher"></canvas>
+          </div>
+          <div class="col-4">
+            <canvas id="damageTakenAverageTopFiveWatcher"></canvas>
+          </div>
+        </div>
+        <div class="row pt-5">
+          <div class="col-6">
+            <div>Floor Deaths Average</div>
+          </div>
+          <div class="col-6">
+            <div>Floor Deaths Total</div>
+          </div>
+        </div>
+        <div class="row pb-5">
+          <div class="col-6">
+            <canvas id="floorDeathsAverage"></canvas>
+          </div>
+          <div class="col-6">
+            <canvas id="floorDeathsSum"></canvas>
+          </div>
+        </div>
+        <div class="row pt-5">
+          <div class="col-6">
+            <div>Ironclad Floor Deaths Average</div>
+          </div>
+          <div class="col-6">
+            <div>Ironclad Floor Deaths Total</div>
+          </div>
+        </div>
+        <div class="row pb-5">
+          <div class="col-6">
+            <canvas id="floorDeathsAverageIronclad"></canvas>
+          </div>
+          <div class="col-6">
+            <canvas id="floorDeathsSumIronclad"></canvas>
+          </div>
+        </div>
+        <div class="row pt-5">
+          <div class="col-6">
+            <div>Silent Floor Deaths Average</div>
+          </div>
+          <div class="col-6">
+            <div>Silent Floor Deaths Total</div>
+          </div>
+        </div>
+        <div class="row pb-5">
+          <div class="col-6">
+            <canvas id="floorDeathsAverageSilent"></canvas>
+          </div>
+          <div class="col-6">
+            <canvas id="floorDeathsSumSilent"></canvas>
+          </div>
+        </div>
+        <div class="row pt-5">
+          <div class="col-6">
+            <div>Defect Floor Deaths Average</div>
+          </div>
+          <div class="col-6">
+            <div>Defect Floor Deaths Total</div>
+          </div>
+        </div>
+        <div class="row pb-5">
+          <div class="col-6">
+            <canvas id="floorDeathsAverageDefect"></canvas>
+          </div>
+          <div class="col-6">
+            <canvas id="floorDeathsSumDefect"></canvas>
+          </div>
+        </div>
+        <div class="row pt-5">
+          <div class="col-6">
+            <div>Watcher Floor Deaths Average</div>
+          </div>
+          <div class="col-6">
+            <div>Watcher Floor Deaths Total</div>
+          </div>
+        </div>
+        <div class="row pb-5">
+          <div class="col-6">
+            <canvas id="floorDeathsAverageWatcher"></canvas>
+          </div>
+          <div class="col-6">
+            <canvas id="floorDeathsSumWatcher"></canvas>
+          </div>
         </div>
       </div>
     </div>
