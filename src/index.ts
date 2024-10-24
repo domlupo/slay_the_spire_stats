@@ -1,5 +1,402 @@
-import Chart from "chart.js/auto";
-import parseJson, { JSONError } from "parse-json";
+import Chart, { ChartItem } from "chart.js/auto";
+
+const GRAPH_TOTAL_WIN_RATIOS = "totalWinRatios";
+const GRAPH_TOTAL_WINS = "totalWins";
+const GRAPH_TOTAL_LOSSES = "totalLosses";
+const GRAPH_TOTAL_TURNS = "totalTurns";
+const GRAPH_TOTAL_CARD_PICKS = "totalCardPicks";
+const GRAPH_TOTAL_CARD_SKIPS = "totalCardSkips";
+const GRAPH_TOTAL_DAMAGE_TAKEN = "totalDamageTaken";
+const GRAPH_TOTAL_CARDS_PURCHASED = "totalCardsPurchased";
+const GRAPH_TOTAL_RELICS_PURCHASED = "totalRelicsPurchased";
+const GRAPH_TOTAL_POTIONS_PURCHASED = "totalPotionsPurchased";
+const GRAPH_TOTAL_POTIONS_USED = "totalPotionsUsed";
+
+const GRAPH_KILLED_BY_AVERAGE_TOP_FIVE = "killedByAverageTopFive";
+const GRAPH_KILLED_BY_SUM_TOP_FIVE = "killedBySumTopFive";
+const GRAPH_DAMAGE_TAKEN_AVERAGE_TOP_FIVE = "damageTakenAverageTopFive";
+const GRAPH_KILLED_BY_AVERAGE_TOP_FIVE_IRONCLAD =
+  "killedByAverageTopFiveIronclad";
+const GRAPH_KILLED_BY_SUM_TOP_FIVE_IRONCLAD = "killedBySumTopFiveIronclad";
+const GRAPH_DAMAGE_TAKEN_AVERAGE_TOP_FIVE_IRONCLAD =
+  "damageTakenAverageTopFiveIronclad";
+const GRAPH_KILLED_BY_AVERAGE_TOP_FIVE_SILENT = "killedByAverageTopFiveSilent";
+const GRAPH_KILLED_BY_SUM_TOP_FIVE_SILENT = "killedBySumTopFiveSilent";
+const GRAPH_DAMAGE_TAKEN_AVERAGE_TOP_FIVE_SILENT =
+  "damageTakenAverageTopFiveSilent";
+const GRAPH_KILLED_BY_AVERAGE_TOP_FIVE_DEFECT = "killedByAverageTopFiveDefect";
+const GRAPH_KILLED_BY_SUM_TOP_FIVE_DEFECT = "killedBySumTopFiveDefect";
+const GRAPH_DAMAGE_TAKEN_AVERAGE_TOP_FIVE_DEFECT =
+  "damageTakenAverageTopFiveDefect";
+const GRAPH_KILLED_BY_AVERAGE_TOP_FIVE_WATCHER =
+  "killedByAverageTopFiveWatcher";
+const GRAPH_KILLED_BY_SUM_TOP_FIVE_WATCHER = "killedBySumTopFiveWatcher";
+const GRAPH_DAMAGE_TAKEN_AVERAGE_TOP_FIVE_WATCHER =
+  "damageTakenAverageTopFiveWatcher";
+
+const GRAPH_FLOOR_DEATHS_AVERAGE = "floorDeathsAverage";
+const GRAPH_FLOOR_DEATHS_SUM = "floorDeathsSum";
+const GRAPH_FLOOR_DEATHS_AVERAGE_IRONCLAD = "floorDeathsAverageIronclad";
+const GRAPH_FLOOR_DEATHS_SUM_IRONCLAD = "floorDeathsSumIronclad";
+const GRAPH_FLOOR_DEATHS_AVERAGE_SILENT = "floorDeathsAverageSilent";
+const GRAPH_FLOOR_DEATHS_SUM_SILENT = "floorDeathsSumSilent";
+const GRAPH_FLOOR_DEATHS_AVERAGE_DEFECT = "floorDeathsAverageDefect";
+const GRAPH_FLOOR_DEATHS_SUM_DEFECT = "floorDeathsSumDefect";
+const GRAPH_FLOOR_DEATHS_AVERAGE_WATCHER = "floorDeathsAverageWatcher";
+const GRAPH_FLOOR_DEATHS_SUM_WATCHER = "floorDeathsSumWatcher";
+
+// preload graph data
+window.addEventListener("load", () => {
+  graphDoughnut(
+    GRAPH_TOTAL_WIN_RATIOS,
+    "Win Ratios",
+    [0.286, 0.135, 0.254, 0.179],
+  );
+  graphDoughnut(GRAPH_TOTAL_WINS, "Wins", [16, 14, 16, 5]);
+  graphDoughnut(GRAPH_TOTAL_LOSSES, "Losses", [40, 90, 47, 23]);
+  graphDoughnut(GRAPH_TOTAL_TURNS, "Turns", [5_071, 7_349, 5_063, 2_487]);
+  graphDoughnut(GRAPH_TOTAL_CARD_PICKS, "Card Picks", [679, 935, 772, 332]);
+  graphDoughnut(GRAPH_TOTAL_CARD_SKIPS, "Card Skips", [289, 504, 242, 177]);
+  graphDoughnut(
+    GRAPH_TOTAL_DAMAGE_TAKEN,
+    "Damage Taken",
+    [17_467, 13_302, 11_822, 6_344],
+  );
+  graphDoughnut(
+    GRAPH_TOTAL_CARDS_PURCHASED,
+    "Cards Purchased",
+    [77, 66, 77, 33],
+  );
+  graphDoughnut(
+    GRAPH_TOTAL_RELICS_PURCHASED,
+    "Relics Purchased",
+    [95, 128, 98, 37],
+  );
+  graphDoughnut(
+    GRAPH_TOTAL_POTIONS_PURCHASED,
+    "Potions Purchased",
+    [25, 28, 17, 13],
+  );
+  // preload data has same values as the same as sample data used for manual testing.
+  // set potions used to 250 instead of 524 for silent so form upload has visual feedback.
+  graphDoughnut(GRAPH_TOTAL_POTIONS_USED, "Potions Used", [282, 250, 285, 158]);
+
+  graphBarChart(
+    GRAPH_KILLED_BY_AVERAGE_TOP_FIVE,
+    [
+      Battle[Battle.TheHeart],
+      Battle[Battle.Automaton],
+      Battle[Battle.TheGuardian],
+      Battle[Battle.TimeEater],
+      Battle[Battle.SlimeBoss],
+    ],
+    [0.368, 0.3, 0.211, 0.208, 0.203],
+  );
+  graphBarChart(
+    GRAPH_KILLED_BY_SUM_TOP_FIVE,
+    [
+      Battle[Battle.ThreeSentries],
+      Battle[Battle.GremlinNob],
+      Battle[Battle.TheGuardian],
+      Battle[Battle.TheHeart],
+      Battle[Battle.SlimeBoss],
+    ],
+    [17, 17, 15, 14, 13],
+  );
+  graphBarChart(
+    GRAPH_DAMAGE_TAKEN_AVERAGE_TOP_FIVE,
+    [
+      Battle[Battle.TheHeart],
+      Battle[Battle.TimeEater],
+      Battle[Battle.Automaton],
+      Battle[Battle.AwakenedOne],
+      Battle[Battle.DonuAndDeca],
+    ],
+    [71.184, 39.875, 38.75, 34.519, 33.84],
+  );
+
+  graphBarChart(
+    GRAPH_KILLED_BY_AVERAGE_TOP_FIVE_IRONCLAD,
+    [
+      Battle[Battle.TheGuardian],
+      Battle[Battle.TheHeart],
+      Battle[Battle.Collector],
+      Battle[Battle.Hexaghost],
+      Battle[Battle.SlimeBoss],
+    ],
+    [0.4, 0.273, 0.25, 0.217, 0.214],
+  );
+  graphBarChart(
+    GRAPH_KILLED_BY_SUM_TOP_FIVE_IRONCLAD,
+    [
+      Battle[Battle.Hexaghost],
+      Battle[Battle.TheGuardian],
+      Battle[Battle.SlimeBoss],
+      Battle[Battle.TheHeart],
+      Battle[Battle.Slavers],
+    ],
+    [5, 4, 3, 3, 2],
+  );
+  graphBarChart(
+    GRAPH_DAMAGE_TAKEN_AVERAGE_TOP_FIVE_IRONCLAD,
+    [
+      Battle[Battle.TheHeart],
+      Battle[Battle.DonuAndDeca],
+      Battle[Battle.ShieldAndSpear],
+      Battle[Battle.AwakenedOne],
+      Battle[Battle.TimeEater],
+    ],
+    [96.636, 50, 48, 46.9, 46.667],
+  );
+
+  graphBarChart(
+    GRAPH_KILLED_BY_AVERAGE_TOP_FIVE_SILENT,
+    [
+      Battle[Battle.TheHeart],
+      Battle[Battle.Automaton],
+      Battle[Battle.SlimeBoss],
+      Battle[Battle.TimeEater],
+      Battle[Battle.Hexaghost],
+    ],
+    [0.636, 0.417, 0.348, 0.3, 0.235],
+  );
+  graphBarChart(
+    GRAPH_KILLED_BY_SUM_TOP_FIVE_SILENT,
+    [
+      Battle[Battle.GremlinNob],
+      Battle[Battle.SlimeBoss],
+      Battle[Battle.ThreeSentries],
+      Battle[Battle.TheGuardian],
+      Battle[Battle.TheHeart],
+    ],
+    [11, 8, 7, 7, 7],
+  );
+  graphBarChart(
+    GRAPH_DAMAGE_TAKEN_AVERAGE_TOP_FIVE_SILENT,
+    [
+      Battle[Battle.TheHeart],
+      Battle[Battle.TimeEater],
+      Battle[Battle.Automaton],
+      Battle[Battle.DonuAndDeca],
+      Battle[Battle.Champ],
+    ],
+    [62.091, 34.3, 28.75, 28, 23],
+  );
+
+  graphBarChart(
+    GRAPH_KILLED_BY_AVERAGE_TOP_FIVE_DEFECT,
+    [
+      Battle[Battle.Collector],
+      Battle[Battle.Automaton],
+      Battle[Battle.MaskedBandits],
+      Battle[Battle.TheHeart],
+      Battle[Battle.Transient],
+    ],
+    [0.3, 0.25, 0.2, 0.182, 0.167],
+  );
+  graphBarChart(
+    GRAPH_KILLED_BY_SUM_TOP_FIVE_DEFECT,
+    [
+      Battle[Battle.ThreeSentries],
+      Battle[Battle.BookOfStabbing],
+      Battle[Battle.Slavers],
+      Battle[Battle.GremlinNob],
+      Battle[Battle.Collector],
+    ],
+    [6, 4, 4, 4, 3],
+  );
+  graphBarChart(
+    GRAPH_DAMAGE_TAKEN_AVERAGE_TOP_FIVE_DEFECT,
+    [
+      Battle[Battle.TheHeart],
+      Battle[Battle.Collector],
+      Battle[Battle.AwakenedOne],
+      Battle[Battle.DonuAndDeca],
+      Battle[Battle.TimeEater],
+    ],
+    [53.909, 41.9, 40, 34.556, 32.4],
+  );
+
+  graphBarChart(
+    GRAPH_KILLED_BY_AVERAGE_TOP_FIVE_WATCHER,
+    [
+      Battle[Battle.TwoOrbWalkers],
+      Battle[Battle.Automaton],
+      Battle[Battle.TheHeart],
+      Battle[Battle.TimeEater],
+      Battle[Battle.DonuAndDeca],
+    ],
+    [0.667, 0.571, 0.4, 0.333, 0.333],
+  );
+  graphBarChart(
+    GRAPH_KILLED_BY_SUM_TOP_FIVE_WATCHER,
+    [
+      Battle[Battle.Automaton],
+      Battle[Battle.Slavers],
+      Battle[Battle.GremlinNob],
+      Battle[Battle.TwoOrbWalkers],
+      Battle[Battle.ThreeSentries],
+    ],
+    [4, 2, 2, 2, 2],
+  );
+  graphBarChart(
+    GRAPH_DAMAGE_TAKEN_AVERAGE_TOP_FIVE_WATCHER,
+    [
+      Battle[Battle.TheHeart],
+      Battle[Battle.Automaton],
+      Battle[Battle.TimeEater],
+      Battle[Battle.AwakenedOne],
+      Battle[Battle.TwoOrbWalkers],
+    ],
+    [73.2, 61, 57.333, 43.667, 40.333],
+  );
+
+  graphBarChart(
+    GRAPH_FLOOR_DEATHS_AVERAGE,
+    orderedFloorDeaths(),
+    [
+      0.012, 0.105, 0.122, 0.195, 0.236, 0.092, 0.202, 0.126, 0.13, 0.107, 0,
+      0.03, 0.215,
+    ],
+  );
+  graphBarChart(
+    GRAPH_FLOOR_DEATHS_SUM,
+    orderedFloorDeaths(),
+    [3, 26, 27, 38, 37, 11, 22, 11, 1, 8, 0, 2, 14],
+  );
+  graphBarChart(
+    GRAPH_FLOOR_DEATHS_AVERAGE_IRONCLAD,
+    orderedFloorDeaths(),
+    [
+      0.018, 0.036, 0.094, 0.25, 0.222, 0, 0.143, 0.125, 0, 0.048, 0, 0.05,
+      0.158,
+    ],
+  );
+  graphBarChart(
+    GRAPH_FLOOR_DEATHS_SUM_IRONCLAD,
+    orderedFloorDeaths(),
+    [1, 2, 5, 12, 8, 0, 4, 3, 0, 1, 0, 1, 3],
+  );
+  graphBarChart(
+    GRAPH_FLOOR_DEATHS_AVERAGE_SILENT,
+    orderedFloorDeaths(),
+    [
+      0.01, 0.146, 0.17, 0.26, 0.278, 0.103, 0.229, 0.111, 0, 0.125, 0, 0,
+      0.333,
+    ],
+  );
+  graphBarChart(
+    GRAPH_FLOOR_DEATHS_SUM_SILENT,
+    orderedFloorDeaths(),
+    [1, 15, 15, 19, 15, 4, 8, 3, 0, 3, 0, 0, 7],
+  );
+  graphBarChart(
+    GRAPH_FLOOR_DEATHS_AVERAGE_DEFECT,
+    orderedFloorDeaths(),
+    [
+      0.016, 0.097, 0.107, 0.1, 0.244, 0.147, 0.207, 0.087, 0, 0.095, 0, 0.053,
+      0.111,
+    ],
+  );
+  graphBarChart(
+    GRAPH_FLOOR_DEATHS_SUM_DEFECT,
+    orderedFloorDeaths(),
+    [1, 6, 6, 5, 11, 5, 6, 2, 0, 2, 0, 1, 2],
+  );
+  graphBarChart(
+    GRAPH_FLOOR_DEATHS_AVERAGE_WATCHER,
+    orderedFloorDeaths(),
+    [
+      0, 0.107, 0.04, 0.083, 0.136, 0.105, 0.235, 0.231, 0.1, 0.222, 0, 0,
+      0.286,
+    ],
+  );
+  graphBarChart(
+    GRAPH_FLOOR_DEATHS_SUM_WATCHER,
+    orderedFloorDeaths(),
+    [0, 3, 1, 2, 3, 2, 4, 3, 1, 2, 0, 0, 2],
+  );
+});
+
+function orderedFloorDeaths(): string[] {
+  return [
+    FloorDeath[FloorDeath.BeforeActOne],
+    FloorDeath[FloorDeath.ActOneFirstHalf],
+    FloorDeath[FloorDeath.ActOneSecondHalf],
+    FloorDeath[FloorDeath.ActOneBoss],
+    FloorDeath[FloorDeath.ActTwoFirstHalf],
+    FloorDeath[FloorDeath.ActTwoSecondHalf],
+    FloorDeath[FloorDeath.ActTwoBoss],
+    FloorDeath[FloorDeath.ActThreeFirstHalf],
+    FloorDeath[FloorDeath.ActThreeSecondHalf],
+    FloorDeath[FloorDeath.ActThreeFirstBoss],
+    FloorDeath[FloorDeath.ActThreeSecondBoss],
+    FloorDeath[FloorDeath.ShieldAndSpear],
+    FloorDeath[FloorDeath.TheHeart],
+  ];
+}
+
+function graphDoughnut(graphName: string, label: string, data: number[]) {
+  new Chart(document.getElementById(graphName) as ChartItem, {
+    type: "doughnut",
+    data: {
+      datasets: [
+        {
+          label,
+          data: data,
+          backgroundColor: [
+            "rgb(255, 102, 102)",
+            "rgb(102, 255, 178)",
+            "rgb(102, 178, 255)",
+            "rgb(178, 102, 255)",
+          ],
+        },
+      ],
+    },
+  });
+}
+
+function graphBarChart(graphName: string, labels: string[], data: number[]) {
+  new Chart(document.getElementById(graphName) as ChartItem, {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: "",
+          data: data,
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+    },
+  });
+}
+
+function updateGraph(graphName: string, data: number[]) {
+  let chart: Chart = Chart.getChart(graphName) as Chart;
+  chart.data.datasets[0].data = data;
+  chart.update();
+}
+
+function updateBarChart(graphName: string, labels: string[], data: number[]) {
+  let chart: Chart = Chart.getChart(graphName) as Chart;
+  chart.data.labels = labels;
+  chart.data.datasets[0].data = data;
+  chart.update();
+}
+
+function updateBarChartTopFive(graphName: string, topFive: TopFive) {
+  let chart: Chart = Chart.getChart(graphName) as Chart;
+  chart.data.labels = topFive.label;
+  chart.data.datasets[0].data = topFive.data;
+  chart.update();
+}
 
 // The file structure and fields may have changed over the years. Comments assume it remained stable.
 type StsFile = {
@@ -2580,20 +2977,27 @@ function graphFloorDeaths(files: StsFile[]) {
     }
   }
 
-  graphFloorDeathsSum("floorDeathsSum", floorDeathsSum);
-  graphFloorDeathsAverage("floorDeathsAverage", floorDeathsRecord);
-  graphFloorDeathsSum("floorDeathsSumIronclad", floorDeathsSumIronclad);
+  graphFloorDeathsSum(GRAPH_FLOOR_DEATHS_SUM, floorDeathsSum);
+  graphFloorDeathsAverage(GRAPH_FLOOR_DEATHS_AVERAGE, floorDeathsRecord);
+
+  graphFloorDeathsSum(GRAPH_FLOOR_DEATHS_SUM_IRONCLAD, floorDeathsSumIronclad);
   graphFloorDeathsAverage(
-    "floorDeathsAverageIronclad",
+    GRAPH_FLOOR_DEATHS_AVERAGE_IRONCLAD,
     floorDeathsRecordIronclad,
   );
-  graphFloorDeathsSum("floorDeathsSumSilent", floorDeathsSumSilent);
-  graphFloorDeathsAverage("floorDeathsAverageSilent", floorDeathsRecordSilent);
-  graphFloorDeathsSum("floorDeathsSumDefect", floorDeathsSumDefect);
-  graphFloorDeathsAverage("floorDeathsAverageDefect", floorDeathsRecordDefect);
-  graphFloorDeathsSum("floorDeathsSumWatcher", floorDeathsSumWatcher);
+  graphFloorDeathsSum(GRAPH_FLOOR_DEATHS_SUM_SILENT, floorDeathsSumSilent);
   graphFloorDeathsAverage(
-    "floorDeathsAverageWatcher",
+    GRAPH_FLOOR_DEATHS_AVERAGE_SILENT,
+    floorDeathsRecordSilent,
+  );
+  graphFloorDeathsSum(GRAPH_FLOOR_DEATHS_SUM_DEFECT, floorDeathsSumDefect);
+  graphFloorDeathsAverage(
+    GRAPH_FLOOR_DEATHS_AVERAGE_DEFECT,
+    floorDeathsRecordDefect,
+  );
+  graphFloorDeathsSum(GRAPH_FLOOR_DEATHS_SUM_WATCHER, floorDeathsSumWatcher);
+  graphFloorDeathsAverage(
+    GRAPH_FLOOR_DEATHS_AVERAGE_WATCHER,
     floorDeathsRecordWatcher,
   );
 }
@@ -2611,25 +3015,7 @@ function graphFloorDeathsSum(
     }
   }
 
-  new Chart(document.getElementById(graphName)!, {
-    type: "bar",
-    data: {
-      labels: floorDeathsSumLabel,
-      datasets: [
-        {
-          label: "",
-          data: floorDeathsSumData,
-        },
-      ],
-    },
-    options: {
-      plugins: {
-        legend: {
-          display: false,
-        },
-      },
-    },
-  });
+  updateBarChart(graphName, floorDeathsSumLabel, floorDeathsSumData);
 }
 
 function graphFloorDeathsAverage(
@@ -2645,25 +3031,7 @@ function graphFloorDeathsAverage(
     }
   }
 
-  new Chart(document.getElementById(graphName)!, {
-    type: "bar",
-    data: {
-      labels: floorDeathsAverageLabel,
-      datasets: [
-        {
-          label: "",
-          data: floorDeathsAverageData,
-        },
-      ],
-    },
-    options: {
-      plugins: {
-        legend: {
-          display: false,
-        },
-      },
-    },
-  });
+  updateBarChart(graphName, floorDeathsAverageLabel, floorDeathsAverageData);
 }
 
 function incrementFloorDeaths(
@@ -3268,42 +3636,63 @@ function graphTopFives(files: StsFile[]) {
   let killedBySumTopFiveGraph = killedBySumTopFive(killedBySum);
   let killedByAverageTopFive = averageTopFive(killedByRecord);
   let averageDamageTakenTopFive = averageTopFive(damageTakenRecord);
-  graphBarChart("killedBySumTopFive", killedBySumTopFiveGraph);
-  graphBarChart("killedByAverageTopFive", killedByAverageTopFive);
-  graphBarChart("damageTakenAverageTopFive", averageDamageTakenTopFive);
+  updateBarChartTopFive(
+    GRAPH_KILLED_BY_AVERAGE_TOP_FIVE,
+    killedByAverageTopFive,
+  );
+  updateBarChartTopFive(GRAPH_KILLED_BY_SUM_TOP_FIVE, killedBySumTopFiveGraph);
+  updateBarChartTopFive(
+    GRAPH_DAMAGE_TAKEN_AVERAGE_TOP_FIVE,
+    averageDamageTakenTopFive,
+  );
 
   let killedBySumTopFiveGraphIronclad = killedBySumTopFive(killedBySumIronclad);
   let killedByAverageTopFiveIronclad = averageTopFive(killedByRecordIronClad);
   let averageDamageTakenTopFiveIronclad = averageTopFive(
     damageTakenRecordIronclad,
   );
-  graphBarChart("killedBySumTopFiveIronclad", killedBySumTopFiveGraphIronclad);
-  graphBarChart(
-    "killedByAverageTopFiveIronclad",
+  updateBarChartTopFive(
+    GRAPH_KILLED_BY_AVERAGE_TOP_FIVE_IRONCLAD,
     killedByAverageTopFiveIronclad,
   );
-  graphBarChart(
-    "damageTakenAverageTopFiveIronclad",
+  updateBarChartTopFive(
+    GRAPH_KILLED_BY_SUM_TOP_FIVE_IRONCLAD,
+    killedBySumTopFiveGraphIronclad,
+  );
+  updateBarChartTopFive(
+    GRAPH_DAMAGE_TAKEN_AVERAGE_TOP_FIVE_IRONCLAD,
     averageDamageTakenTopFiveIronclad,
   );
 
   let killedBySumTopFiveGraphSilent = killedBySumTopFive(killedBySumSilent);
   let killedByAverageTopFiveSilent = averageTopFive(killedByRecordSilent);
   let averageDamageTakenTopFiveSilent = averageTopFive(damageTakenRecordSilent);
-  graphBarChart("killedBySumTopFiveSilent", killedBySumTopFiveGraphSilent);
-  graphBarChart("killedByAverageTopFiveSilent", killedByAverageTopFiveSilent);
-  graphBarChart(
-    "damageTakenAverageTopFiveSilent",
+  updateBarChartTopFive(
+    GRAPH_KILLED_BY_AVERAGE_TOP_FIVE_SILENT,
+    killedByAverageTopFiveSilent,
+  );
+  updateBarChartTopFive(
+    GRAPH_KILLED_BY_SUM_TOP_FIVE_SILENT,
+    killedBySumTopFiveGraphSilent,
+  );
+  updateBarChartTopFive(
+    GRAPH_DAMAGE_TAKEN_AVERAGE_TOP_FIVE_SILENT,
     averageDamageTakenTopFiveSilent,
   );
 
   let killedBySumTopFiveGraphDefect = killedBySumTopFive(killedBySumDefect);
   let killedByAverageTopFiveDefect = averageTopFive(killedByRecordDefect);
   let averageDamageTakenTopFiveDefect = averageTopFive(damageTakenRecordDefect);
-  graphBarChart("killedBySumTopFiveDefect", killedBySumTopFiveGraphDefect);
-  graphBarChart("killedByAverageTopFiveDefect", killedByAverageTopFiveDefect);
-  graphBarChart(
-    "damageTakenAverageTopFiveDefect",
+  updateBarChartTopFive(
+    GRAPH_KILLED_BY_AVERAGE_TOP_FIVE_DEFECT,
+    killedByAverageTopFiveDefect,
+  );
+  updateBarChartTopFive(
+    GRAPH_KILLED_BY_SUM_TOP_FIVE_DEFECT,
+    killedBySumTopFiveGraphDefect,
+  );
+  updateBarChartTopFive(
+    GRAPH_DAMAGE_TAKEN_AVERAGE_TOP_FIVE_DEFECT,
     averageDamageTakenTopFiveDefect,
   );
 
@@ -3312,34 +3701,18 @@ function graphTopFives(files: StsFile[]) {
   let averageDamageTakenTopFiveWatcher = averageTopFive(
     damageTakenRecordWatcher,
   );
-  graphBarChart("killedBySumTopFiveWatcher", killedBySumTopFiveGraphWatcher);
-  graphBarChart("killedByAverageTopFiveWatcher", killedByAverageTopFiveWatcher);
-  graphBarChart(
-    "damageTakenAverageTopFiveWatcher",
+  updateBarChartTopFive(
+    GRAPH_KILLED_BY_AVERAGE_TOP_FIVE_WATCHER,
+    killedByAverageTopFiveWatcher,
+  );
+  updateBarChartTopFive(
+    GRAPH_KILLED_BY_SUM_TOP_FIVE_WATCHER,
+    killedBySumTopFiveGraphWatcher,
+  );
+  updateBarChartTopFive(
+    GRAPH_DAMAGE_TAKEN_AVERAGE_TOP_FIVE_WATCHER,
     averageDamageTakenTopFiveWatcher,
   );
-}
-
-function graphBarChart(elementId: string, topFive: TopFive) {
-  new Chart(document.getElementById(elementId)!, {
-    type: "bar",
-    data: {
-      labels: topFive.label,
-      datasets: [
-        {
-          label: "",
-          data: topFive.data,
-        },
-      ],
-    },
-    options: {
-      plugins: {
-        legend: {
-          display: false,
-        },
-      },
-    },
-  });
 }
 
 function incrementKilledBy(battle: Battle, killedBy: Map<Battle, number>) {
@@ -3602,23 +3975,10 @@ function graphTotals(files: StsFile[]) {
     { damageTaken: "Defect Damage Taken", count: defectDamageTaken },
     { damageTaken: "Watcher Damage Taken", count: watcherDamageTaken },
   ];
-  new Chart(document.getElementById("totalDamageTaken")!, {
-    type: "doughnut",
-    data: {
-      datasets: [
-        {
-          label: "Damage",
-          data: damageTakenData.map((row) => row.count),
-          backgroundColor: [
-            "rgb(255, 102, 102)",
-            "rgb(102, 255, 178)",
-            "rgb(102, 178, 255)",
-            "rgb(178, 102, 255)",
-          ],
-        },
-      ],
-    },
-  });
+  updateGraph(
+    GRAPH_TOTAL_DAMAGE_TAKEN,
+    damageTakenData.map((d) => d.count),
+  );
 
   let turnData = [
     { turnsTaken: "Ironclad Turns", count: ironcladTurnsTaken },
@@ -3626,23 +3986,10 @@ function graphTotals(files: StsFile[]) {
     { turnsTaken: "Defect Turns", count: defectTurnsTaken },
     { turnsTaken: "Watcher Turns", count: watcherTurnsTaken },
   ];
-  new Chart(document.getElementById("totalTurns")!, {
-    type: "doughnut",
-    data: {
-      datasets: [
-        {
-          label: "Turns",
-          data: turnData.map((row) => row.count),
-          backgroundColor: [
-            "rgb(255, 102, 102)",
-            "rgb(102, 255, 178)",
-            "rgb(102, 178, 255)",
-            "rgb(178, 102, 255)",
-          ],
-        },
-      ],
-    },
-  });
+  updateGraph(
+    GRAPH_TOTAL_TURNS,
+    turnData.map((d) => d.count),
+  );
 
   let winData = [
     { wins: "Ironclad Wins", count: ironcladWins },
@@ -3650,23 +3997,10 @@ function graphTotals(files: StsFile[]) {
     { wins: "Defect Wins", count: defectWins },
     { wins: "Watcher Wins", count: watcherWins },
   ];
-  new Chart(document.getElementById("totalWins")!, {
-    type: "doughnut",
-    data: {
-      datasets: [
-        {
-          label: "Wins",
-          data: winData.map((row) => row.count),
-          backgroundColor: [
-            "rgb(255, 102, 102)",
-            "rgb(102, 255, 178)",
-            "rgb(102, 178, 255)",
-            "rgb(178, 102, 255)",
-          ],
-        },
-      ],
-    },
-  });
+  updateGraph(
+    GRAPH_TOTAL_WINS,
+    winData.map((d) => d.count),
+  );
 
   let lossesData = [
     { losses: "Ironclad Losses", count: ironcladLosses },
@@ -3674,23 +4008,10 @@ function graphTotals(files: StsFile[]) {
     { losses: "Defect Losses", count: defectLosses },
     { losses: "Watcher Losses", count: watcherLosses },
   ];
-  new Chart(document.getElementById("totalLosses")!, {
-    type: "doughnut",
-    data: {
-      datasets: [
-        {
-          label: "Losses",
-          data: lossesData.map((row) => row.count),
-          backgroundColor: [
-            "rgb(255, 102, 102)",
-            "rgb(102, 255, 178)",
-            "rgb(102, 178, 255)",
-            "rgb(178, 102, 255)",
-          ],
-        },
-      ],
-    },
-  });
+  updateGraph(
+    GRAPH_TOTAL_LOSSES,
+    lossesData.map((d) => d.count),
+  );
 
   let winRatioData = [
     {
@@ -3710,23 +4031,10 @@ function graphTotals(files: StsFile[]) {
       count: watcherWins / (watcherWins + watcherLosses),
     },
   ];
-  new Chart(document.getElementById("totalWinRatios")!, {
-    type: "doughnut",
-    data: {
-      datasets: [
-        {
-          label: "Win Ratios",
-          data: winRatioData.map((row) => row.count),
-          backgroundColor: [
-            "rgb(255, 102, 102)",
-            "rgb(102, 255, 178)",
-            "rgb(102, 178, 255)",
-            "rgb(178, 102, 255)",
-          ],
-        },
-      ],
-    },
-  });
+  updateGraph(
+    GRAPH_TOTAL_WIN_RATIOS,
+    winRatioData.map((d) => d.count),
+  );
 
   let cardPicksData = [
     { cardPicks: "Ironclad Card Picks", count: ironcladCardPicks },
@@ -3734,23 +4042,10 @@ function graphTotals(files: StsFile[]) {
     { cardPicks: "Defect Card Picks", count: defectCardPicks },
     { cardPicks: "Watcher Card Picsk", count: watcherCardPicks },
   ];
-  new Chart(document.getElementById("totalCardPicks")!, {
-    type: "doughnut",
-    data: {
-      datasets: [
-        {
-          label: "Card Picks",
-          data: cardPicksData.map((row) => row.count),
-          backgroundColor: [
-            "rgb(255, 102, 102)",
-            "rgb(102, 255, 178)",
-            "rgb(102, 178, 255)",
-            "rgb(178, 102, 255)",
-          ],
-        },
-      ],
-    },
-  });
+  updateGraph(
+    GRAPH_TOTAL_CARD_PICKS,
+    cardPicksData.map((d) => d.count),
+  );
 
   let cardSkipsData = [
     { cardSkips: "Ironclad Card Skips", count: ironcladCardSkips },
@@ -3758,23 +4053,10 @@ function graphTotals(files: StsFile[]) {
     { cardSkips: "Defect Card Skips", count: defectCardSkips },
     { cardSkips: "Watcher Card SKips", count: watcherCardSkips },
   ];
-  new Chart(document.getElementById("totalCardSkips")!, {
-    type: "doughnut",
-    data: {
-      datasets: [
-        {
-          label: "Card Skips",
-          data: cardSkipsData.map((row) => row.count),
-          backgroundColor: [
-            "rgb(255, 102, 102)",
-            "rgb(102, 255, 178)",
-            "rgb(102, 178, 255)",
-            "rgb(178, 102, 255)",
-          ],
-        },
-      ],
-    },
-  });
+  updateGraph(
+    GRAPH_TOTAL_CARD_SKIPS,
+    cardSkipsData.map((d) => d.count),
+  );
 
   let potionsUsedData = [
     { potionsUsed: "Ironclad Potions Used", count: ironcladPotionsUsed },
@@ -3782,23 +4064,10 @@ function graphTotals(files: StsFile[]) {
     { potionsUsed: "Defect Potions Used", count: defectPotionsUsed },
     { potionsUsed: "Watcher Potions Used", count: watcherPotionsUsed },
   ];
-  new Chart(document.getElementById("totalPotionsUsed")!, {
-    type: "doughnut",
-    data: {
-      datasets: [
-        {
-          label: "Potions Used",
-          data: potionsUsedData.map((row) => row.count),
-          backgroundColor: [
-            "rgb(255, 102, 102)",
-            "rgb(102, 255, 178)",
-            "rgb(102, 178, 255)",
-            "rgb(178, 102, 255)",
-          ],
-        },
-      ],
-    },
-  });
+  updateGraph(
+    GRAPH_TOTAL_POTIONS_USED,
+    potionsUsedData.map((d) => d.count),
+  );
 
   let cardsPurchasedData = [
     {
@@ -3809,23 +4078,10 @@ function graphTotals(files: StsFile[]) {
     { cardsPurchased: "Defect Cards Purchased", count: defectCardsPurchased },
     { cardsPurchased: "Watcher Cards Purchased", count: watcherCardsPurchased },
   ];
-  new Chart(document.getElementById("totalCardsPurchased")!, {
-    type: "doughnut",
-    data: {
-      datasets: [
-        {
-          label: "Cards Purchased",
-          data: cardsPurchasedData.map((row) => row.count),
-          backgroundColor: [
-            "rgb(255, 102, 102)",
-            "rgb(102, 255, 178)",
-            "rgb(102, 178, 255)",
-            "rgb(178, 102, 255)",
-          ],
-        },
-      ],
-    },
-  });
+  updateGraph(
+    GRAPH_TOTAL_CARDS_PURCHASED,
+    cardsPurchasedData.map((d) => d.count),
+  );
 
   let relicsPurchasedData = [
     {
@@ -3845,23 +4101,10 @@ function graphTotals(files: StsFile[]) {
       count: watcherRelicsPurchased,
     },
   ];
-  new Chart(document.getElementById("totalRelicsPurchased")!, {
-    type: "doughnut",
-    data: {
-      datasets: [
-        {
-          label: "Relics Purchased",
-          data: relicsPurchasedData.map((row) => row.count),
-          backgroundColor: [
-            "rgb(255, 102, 102)",
-            "rgb(102, 255, 178)",
-            "rgb(102, 178, 255)",
-            "rgb(178, 102, 255)",
-          ],
-        },
-      ],
-    },
-  });
+  updateGraph(
+    GRAPH_TOTAL_RELICS_PURCHASED,
+    relicsPurchasedData.map((d) => d.count),
+  );
 
   let potionsPurchasedData = [
     {
@@ -3881,21 +4124,8 @@ function graphTotals(files: StsFile[]) {
       count: watcherPotionsPurchased,
     },
   ];
-  new Chart(document.getElementById("totalPotionsPurchased")!, {
-    type: "doughnut",
-    data: {
-      datasets: [
-        {
-          label: "Potions Purchased",
-          data: potionsPurchasedData.map((row) => row.count),
-          backgroundColor: [
-            "rgb(255, 102, 102)",
-            "rgb(102, 255, 178)",
-            "rgb(102, 178, 255)",
-            "rgb(178, 102, 255)",
-          ],
-        },
-      ],
-    },
-  });
+  updateGraph(
+    GRAPH_TOTAL_POTIONS_PURCHASED,
+    potionsPurchasedData.map((d) => d.count),
+  );
 }
